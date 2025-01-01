@@ -1,17 +1,31 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
+import { Responsive, WidthProvider } from 'react-grid-layout'
+import { 
+  Menu, 
+  X, 
+  FileText, 
+  Calendar, 
+  CheckSquare, 
+  Plus, 
+  ListTodo, 
+  Type, 
+  LayoutGrid, 
+  Book, 
+  Hash, 
+  Search, 
+  Settings 
+} from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
 import rehypeHighlight from 'rehype-highlight'
 import remarkMath from 'remark-math'
-import { Menu, X, FileText, Calendar, CheckSquare, Plus, ListTodo, Type, LayoutGrid, Book, Hash, Search, Settings } from 'lucide-react'
-import { Responsive, WidthProvider } from 'react-grid-layout'
 import 'katex/dist/katex.min.css'
 import 'highlight.js/styles/github-dark.css'
 import './App.css'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
-type Widget = {
+interface Widget {
   id: string
   type: 'markdown' | 'todo' | 'book'
   layout?: {
@@ -22,13 +36,13 @@ type Widget = {
   }
 }
 
-type TodoItem = {
+interface TodoItem {
   id: string
   text: string
   completed: boolean
 }
 
-type Layout = {
+interface Layout {
   i: string
   x: number
   y: number
@@ -36,12 +50,238 @@ type Layout = {
   h: number
 }
 
-type Note = {
+interface Note {
   id: string
   title: string
   content: string
   tags: string[]
   created: string
+}
+
+function App() {
+  const [markdown, setMarkdown] = useState('')
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [widgets, setWidgets] = useState<Widget[]>([])
+  const [layouts, setLayouts] = useState<{ [key: string]: Layout[] }>({})
+  const [currentBreakpoint, setCurrentBreakpoint] = useState('')
+
+  const getDefaultLayout = (id: string, type: Widget['type']): Layout => {
+    const isMarkdown = type === 'markdown'
+    return {
+      i: id,
+      x: 0,
+      y: Infinity,
+      w: isMarkdown ? 2 : 1,
+      h: isMarkdown ? 8 : 6,
+    }
+  }
+
+  const addWidget = (type: Widget['type']) => {
+    const id = Date.now().toString()
+    const newWidget = { id, type }
+    setWidgets([...widgets, newWidget])
+  }
+
+  const onLayoutChange = (currentLayout: Layout[], allLayouts: { [key: string]: Layout[] }) => {
+    setLayouts(allLayouts)
+  }
+
+  const onBreakpointChange = (newBreakpoint: string) => {
+    setCurrentBreakpoint(newBreakpoint)
+  }
+
+  const autoArrangeLayouts = () => {
+    const cols = {
+      lg: 4,
+      md: 3,
+      sm: 2,
+      xs: 1,
+      xxs: 1
+    }[currentBreakpoint] || 4
+
+    const newLayouts = widgets.map((widget, index) => {
+      const isMarkdown = widget.type === 'markdown'
+      const w = isMarkdown ? Math.min(2, cols) : 1
+      const x = (index % cols) * w
+      const y = Math.floor(index / cols) * (isMarkdown ? 8 : 6)
+
+      return {
+        i: widget.id,
+        x,
+        y,
+        w,
+        h: isMarkdown ? 8 : 6
+      }
+    })
+
+    setLayouts({
+      ...layouts,
+      [currentBreakpoint]: newLayouts
+    })
+  }
+
+  return (
+    <>
+      <button 
+        className="sidebar-toggle"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        aria-label="Toggle sidebar"
+      >
+        {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      <Sidebar 
+        isOpen={isSidebarOpen}
+        onAddWidget={addWidget}
+        onAutoArrange={autoArrangeLayouts}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+      />
+
+      {isSettingsOpen && (
+        <SettingsPage onClose={() => setIsSettingsOpen(false)} />
+      )}
+
+      <div className={`main-content ${isSidebarOpen ? 'shifted' : ''}`}>
+        <div className="container">
+          <ResponsiveGridLayout
+            className="layout"
+            layouts={layouts}
+            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+            cols={{ lg: 4, md: 3, sm: 2, xs: 1, xxs: 1 }}
+            rowHeight={100}
+            margin={[20, 20]}
+            onLayoutChange={onLayoutChange}
+            onBreakpointChange={onBreakpointChange}
+            draggableHandle=".card-header"
+            resizeHandles={['se']}
+            useCSSTransforms={true}
+            preventCollision={false}
+            compactType={null}
+          >
+            {widgets.map(widget => (
+              <div key={widget.id}>
+                {widget.type === 'markdown' && (
+                  <MarkdownWidget markdown={markdown} setMarkdown={setMarkdown} />
+                )}
+                {widget.type === 'todo' && (
+                  <TodoWidget />
+                )}
+                {widget.type === 'book' && (
+                  <BookWidget />
+                )}
+              </div>
+            ))}
+          </ResponsiveGridLayout>
+        </div>
+      </div>
+    </>
+  )
+}
+
+interface SidebarProps {
+  isOpen: boolean
+  onAddWidget: (type: Widget['type']) => void
+  onAutoArrange: () => void
+  onOpenSettings: () => void
+}
+
+function Sidebar({ isOpen, onAddWidget, onAutoArrange, onOpenSettings }: SidebarProps) {
+  return (
+    <div className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <div className="sidebar-content">
+        <div>
+          <h2>Add Widgets</h2>
+          <div className="widget-list">
+            <button className="add-widget-button" onClick={() => onAddWidget('markdown')}>
+              <Type size={16} /> Add Markdown Note
+            </button>
+            <button className="add-widget-button" onClick={() => onAddWidget('todo')}>
+              <CheckSquare size={16} /> Add Todo List
+            </button>
+            <button className="add-widget-button" onClick={() => onAddWidget('book')}>
+              <Book size={16} /> Add Book
+            </button>
+          </div>
+        </div>
+        <div>
+          <h2>Layout</h2>
+          <button className="add-widget-button" onClick={onAutoArrange}>
+            <LayoutGrid size={16} /> Auto Arrange
+          </button>
+        </div>
+        <div>
+          <h2>Application</h2>
+          <button className="add-widget-button" onClick={onOpenSettings}>
+            <Settings size={16} /> Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface MarkdownWidgetProps {
+  markdown: string
+  setMarkdown: (value: string) => void
+}
+
+function MarkdownWidget({ markdown, setMarkdown }: MarkdownWidgetProps) {
+  const [isPreview, setIsPreview] = useState(false)
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric'
+  })
+
+  return (
+    <div className="card">
+      <div className="card-header">
+        <div className="card-title">
+          <FileText size={18} />
+          Untitled Note
+        </div>
+        <button 
+          className="preview-button"
+          onClick={() => setIsPreview(!isPreview)}
+        >
+          {isPreview ? 'Edit' : 'Preview'}
+        </button>
+      </div>
+      <div className="card-content">
+        <div className="meta-info">
+          <span>
+            <Calendar size={14} style={{ display: 'inline', marginRight: '4px' }} /> 
+            Created: {currentDate}
+          </span>
+          <span className="meta-tag">markdown</span>
+        </div>
+        {isPreview ? (
+          <div className="preview prose prose-invert max-w-none">
+            <ReactMarkdown
+              remarkPlugins={[remarkMath]}
+              rehypePlugins={[rehypeKatex, rehypeHighlight]}
+            >
+              {markdown}
+            </ReactMarkdown>
+          </div>
+        ) : (
+          <textarea
+            className="editor"
+            value={markdown}
+            onChange={(e) => setMarkdown(e.target.value)}
+            placeholder="Write your markdown here... 
+            
+Supports:
+- LaTeX: $E = mc^2$
+- Code blocks: ```python
+print('Hello')
+```"
+          />
+        )}
+      </div>
+    </div>
+  )
 }
 
 function TodoWidget() {
@@ -50,7 +290,11 @@ function TodoWidget() {
 
   const addTodo = () => {
     if (newTodo.trim()) {
-      setTodos([...todos, { id: Date.now().toString(), text: newTodo.trim(), completed: false }])
+      setTodos([...todos, { 
+        id: Date.now().toString(), 
+        text: newTodo.trim(), 
+        completed: false 
+      }])
       setNewTodo('')
     }
   }
@@ -103,173 +347,13 @@ function TodoWidget() {
   )
 }
 
-function MarkdownWidget({ markdown, setMarkdown }: { markdown: string; setMarkdown: (value: string) => void }) {
-  const [isPreview, setIsPreview] = useState(false)
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: 'numeric'
-  })
-
-  return (
-    <div className="card">
-      <div className="card-header">
-        <div className="card-title">
-          <FileText size={18} />
-          Untitled Note
-        </div>
-        <button 
-          className="preview-button"
-          onClick={() => setIsPreview(!isPreview)}
-        >
-          {isPreview ? 'Edit' : 'Preview'}
-        </button>
-      </div>
-      <div className="card-content">
-        <div className="meta-info">
-          <span><Calendar size={14} style={{ display: 'inline', marginRight: '4px' }} /> Created: {currentDate}</span>
-          <span className="meta-tag">markdown</span>
-        </div>
-        {isPreview ? (
-          <div className="preview prose prose-invert max-w-none">
-            <ReactMarkdown
-              remarkPlugins={[remarkMath]}
-              rehypePlugins={[
-                rehypeKatex,
-                rehypeHighlight
-              ]}
-            >
-              {markdown}
-            </ReactMarkdown>
-          </div>
-        ) : (
-          <textarea
-            className="editor"
-            value={markdown}
-            onChange={(e) => setMarkdown(e.target.value)}
-            placeholder="Write your markdown here... 
-            
-Supports:
-- LaTeX: $E = mc^2$
-- Code blocks: ```python
-print('Hello')
-```"
-          />
-        )}
-      </div>
-    </div>
-  )
-}
-
-function CommandPalette({ 
-  isOpen, 
-  onClose, 
-  onSelect, 
-  existingTags 
-}: { 
-  isOpen: boolean
-  onClose: () => void
-  onSelect: (tag: string) => void
-  existingTags: string[]
-}) {
-  const [search, setSearch] = useState('')
-  const [selectedIndex, setSelectedIndex] = useState(0)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [isOpen])
-
-  const suggestions = search.trim()
-    ? [...new Set([...existingTags, search])]
-        .filter(tag => tag.toLowerCase().includes(search.toLowerCase()))
-    : existingTags
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault()
-        setSelectedIndex(i => (i + 1) % suggestions.length)
-        break
-      case 'ArrowUp':
-        e.preventDefault()
-        setSelectedIndex(i => (i - 1 + suggestions.length) % suggestions.length)
-        break
-      case 'Enter':
-        e.preventDefault()
-        if (suggestions[selectedIndex]) {
-          onSelect(suggestions[selectedIndex])
-          onClose()
-        } else if (search.trim()) {
-          onSelect(search.trim())
-          onClose()
-        }
-        break
-      case 'Escape':
-        e.preventDefault()
-        onClose()
-        break
-    }
-  }
-
-  if (!isOpen) return null
-
-  return (
-    <div className="command-palette">
-      <div className="command-input-wrapper">
-        <Search size={16} />
-        <input
-          ref={inputRef}
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Search or create tag..."
-          className="command-input"
-        />
-      </div>
-      <div className="command-list">
-        {suggestions.map((tag, index) => (
-          <div
-            key={tag}
-            className={`command-item ${index === selectedIndex ? 'selected' : ''}`}
-            onClick={() => {
-              onSelect(tag)
-              onClose()
-            }}
-          >
-            <Hash size={16} />
-            {tag}
-          </div>
-        ))}
-        {search.trim() && !suggestions.includes(search.trim()) && (
-          <div
-            className={`command-item ${suggestions.length === selectedIndex ? 'selected' : ''}`}
-            onClick={() => {
-              onSelect(search.trim())
-              onClose()
-            }}
-          >
-            <Plus size={16} />
-            Create "{search.trim()}"
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function BookNote({ 
-  note, 
-  onUpdate, 
-  existingTags 
-}: { 
+interface BookNoteProps {
   note: Note
   onUpdate: (note: Note) => void
   existingTags: string[]
-}) {
+}
+
+function BookNote({ note, onUpdate, existingTags }: BookNoteProps) {
   const [isPreview, setIsPreview] = useState(false)
   const [isCommandOpen, setIsCommandOpen] = useState(false)
 
@@ -337,10 +421,7 @@ function BookNote({
         <div className="preview prose prose-invert max-w-none">
           <ReactMarkdown
             remarkPlugins={[remarkMath]}
-            rehypePlugins={[
-              rehypeKatex,
-              rehypeHighlight
-            ]}
+            rehypePlugins={[rehypeKatex, rehypeHighlight]}
           >
             {note.content}
           </ReactMarkdown>
@@ -384,7 +465,6 @@ function BookWidget() {
     setNotes(notes.map(note => 
       note.id === updatedNote.id ? updatedNote : note
     ))
-    // Update all tags
     const newTags = new Set(allTags)
     updatedNote.tags.forEach(tag => newTags.add(tag))
     setAllTags(Array.from(newTags))
@@ -428,7 +508,11 @@ function BookWidget() {
   )
 }
 
-function SettingsPage({ onClose }: { onClose: () => void }) {
+interface SettingsPageProps {
+  onClose: () => void
+}
+
+function SettingsPage({ onClose }: SettingsPageProps) {
   const [theme, setTheme] = useState('dark')
   const [fontSize, setFontSize] = useState('14')
   const [dateFormat, setDateFormat] = useState('MM/DD/YYYY')
@@ -567,149 +651,93 @@ function SettingsPage({ onClose }: { onClose: () => void }) {
   )
 }
 
-function App() {
-  const [markdown, setMarkdown] = useState('')
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [widgets, setWidgets] = useState<Widget[]>([])
-  const [layouts, setLayouts] = useState<{ [key: string]: Layout[] }>({})
-  const [currentBreakpoint, setCurrentBreakpoint] = useState('')
+interface CommandPaletteProps {
+  isOpen: boolean
+  onClose: () => void
+  onSelect: (tag: string) => void
+  existingTags: string[]
+}
 
-  const getDefaultLayout = (id: string, type: Widget['type']): Layout => {
-    const isMarkdown = type === 'markdown'
-    return {
-      i: id,
-      x: 0,
-      y: Infinity, // Places it at the bottom
-      w: isMarkdown ? 2 : 1, // Markdown takes 2 columns
-      h: isMarkdown ? 8 : 6, // Markdown is taller
+function CommandPalette({ isOpen, onClose, onSelect, existingTags }: CommandPaletteProps) {
+  const [search, setSearch] = useState('')
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
+  const suggestions = search.trim()
+    ? [...new Set([...existingTags, search])]
+        .filter(tag => tag.toLowerCase().includes(search.toLowerCase()))
+    : existingTags
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        setSelectedIndex(i => (i + 1) % suggestions.length)
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setSelectedIndex(i => (i - 1 + suggestions.length) % suggestions.length)
+        break
+      case 'Enter':
+        e.preventDefault()
+        if (suggestions[selectedIndex]) {
+          onSelect(suggestions[selectedIndex])
+          onClose()
+        } else if (search.trim()) {
+          onSelect(search.trim())
+          onClose()
+        }
+        break
+      case 'Escape':
+        e.preventDefault()
+        onClose()
+        break
     }
   }
 
-  const addWidget = (type: Widget['type']) => {
-    const id = Date.now().toString()
-    const newWidget = { id, type }
-    setWidgets([...widgets, newWidget])
-  }
-
-  const onLayoutChange = (currentLayout: Layout[], allLayouts: { [key: string]: Layout[] }) => {
-    setLayouts(allLayouts)
-  }
-
-  const onBreakpointChange = (newBreakpoint: string) => {
-    setCurrentBreakpoint(newBreakpoint)
-  }
-
-  const autoArrangeLayouts = () => {
-    // Create a new layout with optimal positions
-    const cols = {
-      lg: 4,
-      md: 3,
-      sm: 2,
-      xs: 1,
-      xxs: 1
-    }[currentBreakpoint] || 4
-
-    const newLayouts = widgets.map((widget, index) => {
-      const isMarkdown = widget.type === 'markdown'
-      const w = isMarkdown ? Math.min(2, cols) : 1
-      const x = (index % cols) * w
-      const y = Math.floor(index / cols) * (isMarkdown ? 8 : 6)
-
-      return {
-        i: widget.id,
-        x,
-        y,
-        w,
-        h: isMarkdown ? 8 : 6
-      }
-    })
-
-    setLayouts({
-      ...layouts,
-      [currentBreakpoint]: newLayouts
-    })
-  }
+  if (!isOpen) return null
 
   return (
-    <>
-      <button 
-        className="sidebar-toggle"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        aria-label="Toggle sidebar"
-      >
-        {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
-
-      <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
-        <div className="sidebar-content">
-          <div>
-            <h2>Add Widgets</h2>
-            <div className="widget-list">
-              <button className="add-widget-button" onClick={() => addWidget('markdown')}>
-                <Type size={16} /> Add Markdown Note
-              </button>
-              <button className="add-widget-button" onClick={() => addWidget('todo')}>
-                <CheckSquare size={16} /> Add Todo List
-              </button>
-              <button className="add-widget-button" onClick={() => addWidget('book')}>
-                <Book size={16} /> Add Book
-              </button>
-            </div>
-          </div>
-          <div>
-            <h2>Layout</h2>
-            <button className="add-widget-button" onClick={autoArrangeLayouts}>
-              <LayoutGrid size={16} /> Auto Arrange
-            </button>
-          </div>
-          <div>
-            <h2>Application</h2>
-            <button className="add-widget-button" onClick={() => setIsSettingsOpen(true)}>
-              <Settings size={16} /> Settings
-            </button>
-          </div>
-        </div>
+    <div className="command-palette">
+      <div className="command-input-wrapper">
+        <Search size={16} />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Search or create tag..."
+          className="command-input"
+          autoFocus
+        />
       </div>
-
-      {isSettingsOpen && (
-        <SettingsPage onClose={() => setIsSettingsOpen(false)} />
-      )}
-
-      <div className={`main-content ${isSidebarOpen ? 'shifted' : ''}`}>
-        <div className="container">
-          <ResponsiveGridLayout
-            className="layout"
-            layouts={layouts}
-            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 4, md: 3, sm: 2, xs: 1, xxs: 1 }}
-            rowHeight={100}
-            margin={[20, 20]}
-            onLayoutChange={onLayoutChange}
-            onBreakpointChange={onBreakpointChange}
-            draggableHandle=".card-header"
-            resizeHandles={['se']}
-            useCSSTransforms={true}
-            preventCollision={false}
-            compactType={null}
+      <div className="command-list">
+        {suggestions.map((tag, index) => (
+          <div
+            key={tag}
+            className={`command-item ${index === selectedIndex ? 'selected' : ''}`}
+            onClick={() => {
+              onSelect(tag)
+              onClose()
+            }}
           >
-            {widgets.map(widget => (
-              <div key={widget.id}>
-                {widget.type === 'markdown' && (
-                  <MarkdownWidget markdown={markdown} setMarkdown={setMarkdown} />
-                )}
-                {widget.type === 'todo' && (
-                  <TodoWidget />
-                )}
-                {widget.type === 'book' && (
-                  <BookWidget />
-                )}
-              </div>
-            ))}
-          </ResponsiveGridLayout>
-        </div>
+            <Hash size={16} />
+            {tag}
+          </div>
+        ))}
+        {search.trim() && !suggestions.includes(search.trim()) && (
+          <div
+            className={`command-item ${suggestions.length === selectedIndex ? 'selected' : ''}`}
+            onClick={() => {
+              onSelect(search.trim())
+              onClose()
+            }}
+          >
+            <Plus size={16} />
+            Create "{search.trim()}"
+          </div>
+        )}
       </div>
-    </>
+    </div>
   )
 }
 
