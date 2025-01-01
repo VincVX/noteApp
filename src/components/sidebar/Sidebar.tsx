@@ -3,6 +3,7 @@ import { Widget } from '../../types'
 
 interface SidebarProps {
   isOpen: boolean
+  onClose: () => void
   onAddWidget: (type: Widget['type']) => void
   onAutoArrange: () => void
   onOpenSettings: () => void
@@ -10,7 +11,7 @@ interface SidebarProps {
   onToggleLayoutLock: () => void
 }
 
-export function Sidebar({ isOpen, onAddWidget, onAutoArrange, onOpenSettings, isLayoutLocked, onToggleLayoutLock }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, onAddWidget, onAutoArrange, onOpenSettings, isLayoutLocked, onToggleLayoutLock }: SidebarProps) {
   return (
     <div className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-content">

@@ -3,7 +3,11 @@ import { Book, Plus } from 'lucide-react'
 import { Note } from '../../types'
 import { BookNote } from './BookNote'
 
-export function BookWidget() {
+interface BookWidgetProps {
+  onDelete: () => void
+}
+
+export function BookWidget({ onDelete }: BookWidgetProps) {
   const [notes, setNotes] = useState<Note[]>([])
   const [allTags, setAllTags] = useState<string[]>([])
 

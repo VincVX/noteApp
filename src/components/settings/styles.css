@@ -340,4 +340,56 @@
 .default-theme-button:hover {
   background-color: var(--color-surface);
   border-color: var(--color-textMuted);
+}
+
+.header-image-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.header-image-controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-image-upload {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.upload-button,
+.remove-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--background-color);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upload-button:hover,
+.remove-button:hover {
+  background: var(--hover-color);
+}
+
+.upload-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.remove-button {
+  color: var(--error-color);
+  border-color: var(--error-color);
+}
+
+.remove-button:hover {
+  background: var(--error-color);
+  color: white;
 } 

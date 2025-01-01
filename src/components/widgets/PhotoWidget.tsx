@@ -2,10 +2,10 @@ import React, { useState, useRef } from 'react'
 import { Image, Upload } from 'lucide-react'
 
 interface PhotoWidgetProps {
-  onDelete?: () => void
+  onDelete: () => void
 }
 
-export const PhotoWidget: React.FC<PhotoWidgetProps> = () => {
+export function PhotoWidget({ onDelete }: PhotoWidgetProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [showContextMenu, setShowContextMenu] = useState(false)
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 })

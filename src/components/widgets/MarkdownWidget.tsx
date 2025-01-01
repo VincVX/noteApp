@@ -9,6 +9,7 @@ import { MarkdownNote } from '../../types'
 interface MarkdownWidgetProps {
   note: MarkdownNote
   onUpdate: (updates: Partial<MarkdownNote>) => void
+  onDelete: () => void
 }
 
 // Memoized header component
@@ -117,7 +118,7 @@ print('Hello')
   />
 ))
 
-export function MarkdownWidget({ note, onUpdate }: MarkdownWidgetProps) {
+export function MarkdownWidget({ note, onUpdate, onDelete }: MarkdownWidgetProps) {
   const [isPreview, setIsPreview] = useState(false)
 
   // Memoized callback handlers

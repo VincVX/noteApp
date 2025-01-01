@@ -2,7 +2,11 @@ import { useState } from 'react'
 import { ListTodo } from 'lucide-react'
 import { TodoItem } from '../../types'
 
-export function TodoWidget() {
+interface TodoWidgetProps {
+  onDelete: () => void
+}
+
+export function TodoWidget({ onDelete }: TodoWidgetProps) {
   const [todos, setTodos] = useState<TodoItem[]>([])
   const [newTodo, setNewTodo] = useState('')
 

@@ -3,10 +3,10 @@ import { Music, LogIn, LogOut } from 'lucide-react'
 import { useSpotify } from '../../contexts/SpotifyContext'
 
 interface SpotifyWidgetProps {
-  onDelete?: () => void
+  onDelete: () => void
 }
 
-export const SpotifyWidget: React.FC<SpotifyWidgetProps> = () => {
+export function SpotifyWidget({ onDelete }: SpotifyWidgetProps) {
   const [spotifyUrl, setSpotifyUrl] = useState('')
   const [isEditing, setIsEditing] = useState(true)
   const { isAuthenticated, login, logout } = useSpotify()

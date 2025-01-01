@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 import { Menu, X } from 'lucide-react'
 import 'katex/dist/katex.min.css'
@@ -9,10 +9,12 @@ import { Widget, Layout, MarkdownNote } from './types'
 import { MarkdownWidget, TodoWidget, BookWidget, SpotifyWidget, PhotoWidget } from './components/widgets'
 import { Sidebar } from './components/sidebar/Sidebar'
 import { SettingsPage } from './components/settings/SettingsPage'
-import { ThemeProvider } from './contexts/ThemeContext'
+import { ThemeProvider, useTheme } from './contexts/ThemeContext'
 import { SpotifyProvider } from './contexts/SpotifyContext'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
+
+const HEADER_HEIGHT = 200 // Height in pixels for the header image region
 
 function AppContent() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -23,13 +25,14 @@ function AppContent() {
   const [currentBreakpoint, setCurrentBreakpoint] = useState('')
   const [isLayoutLocked, setIsLayoutLocked] = useState(false)
   const [lockedLayout, setLockedLayout] = useState<Layout[] | null>(null)
+  const { headerImage, showHeaderImage } = useTheme()
 
   const getDefaultLayout = (id: string, type: Widget['type']): Layout => {
     const isMarkdown = type === 'markdown'
     return {
       i: id,
       x: 0,
-      y: Infinity,
+      y: showHeaderImage ? HEADER_HEIGHT / 50 : 0,
       w: isMarkdown ? 2 : 1,
       h: isMarkdown ? 8 : 6,
     }
@@ -60,12 +63,17 @@ function AppContent() {
   }
 
   const onLayoutChange = (currentLayout: Layout[], allLayouts: { [key: string]: Layout[] }) => {
-    if (!isLayoutLocked) {
-      setLayouts(allLayouts)
-      // Update locked layout if we're about to lock
-      if (lockedLayout === null) {
-        setLockedLayout(currentLayout)
-      }
+    if (showHeaderImage) {
+      const headerRegionHeight = HEADER_HEIGHT / 50
+      const adjustedLayout = currentLayout.map(item => {
+        if (item.y < headerRegionHeight) {
+          return { ...item, y: headerRegionHeight }
+        }
+        return item
+      })
+      setLayouts({ ...allLayouts, [currentBreakpoint]: adjustedLayout })
+    } else {
+      setLayouts({ ...allLayouts, [currentBreakpoint]: currentLayout })
     }
   }
 
@@ -153,17 +161,95 @@ function AppContent() {
     { lg: 4, md: 3, sm: 2, xs: 1, xxs: 1 }
 
   return (
-    <>
+    <div className={`app ${isSidebarOpen ? 'sidebar-open' : ''}`}>
       <button 
         className="sidebar-toggle"
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         aria-label="Toggle sidebar"
       >
-        {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
+
+      {showHeaderImage && headerImage && (
+        <div 
+          className="header-image"
+          style={{ 
+            height: HEADER_HEIGHT,
+            backgroundImage: `url(${headerImage})`,
+          }}
+        />
+      )}
+
+      <div className="main-content">
+        <div className="canvas">
+          <ResponsiveGridLayout
+            className="layout"
+            layouts={currentLayouts}
+            breakpoints={breakpoints}
+            cols={cols}
+            rowHeight={50}
+            margin={[20, 20]}
+            onLayoutChange={onLayoutChange}
+            onBreakpointChange={onBreakpointChange}
+            draggableHandle=".card-header"
+            resizeHandles={isLayoutLocked ? [] : ['se']}
+            isDraggable={!isLayoutLocked}
+            isResizable={!isLayoutLocked}
+            useCSSTransforms={true}
+            preventCollision={false}
+            compactType="vertical"
+            containerPadding={[20, 20]}
+          >
+            {widgets.map(widget => (
+              <div key={widget.id} className="widget-container">
+                <button 
+                  className="widget-delete-btn" 
+                  onClick={() => deleteWidget(widget.id)}
+                  aria-label="Delete widget"
+                >
+                  <X size={16} />
+                </button>
+                {widget.type === 'markdown' && (
+                  <MarkdownWidget
+                    key={widget.id}
+                    note={markdownNotes[widget.id]}
+                    onUpdate={(updates) => updateMarkdownNote(widget.id, updates)}
+                    onDelete={() => deleteWidget(widget.id)}
+                  />
+                )}
+                {widget.type === 'todo' && (
+                  <TodoWidget
+                    key={widget.id}
+                    onDelete={() => deleteWidget(widget.id)}
+                  />
+                )}
+                {widget.type === 'book' && (
+                  <BookWidget
+                    key={widget.id}
+                    onDelete={() => deleteWidget(widget.id)}
+                  />
+                )}
+                {widget.type === 'spotify' && (
+                  <SpotifyWidget
+                    key={widget.id}
+                    onDelete={() => deleteWidget(widget.id)}
+                  />
+                )}
+                {widget.type === 'photo' && (
+                  <PhotoWidget
+                    key={widget.id}
+                    onDelete={() => deleteWidget(widget.id)}
+                  />
+                )}
+              </div>
+            ))}
+          </ResponsiveGridLayout>
+        </div>
+      </div>
 
       <Sidebar 
         isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
         onAddWidget={addWidget}
         onAutoArrange={autoArrangeLayouts}
         onOpenSettings={() => setIsSettingsOpen(true)}
@@ -174,110 +260,7 @@ function AppContent() {
       {isSettingsOpen && (
         <SettingsPage onClose={() => setIsSettingsOpen(false)} />
       )}
-
-      <div className={`main-content ${isSidebarOpen ? 'shifted' : ''}`}>
-        <div className="container">
-          <ResponsiveGridLayout
-            className="layout"
-            layouts={currentLayouts}
-            breakpoints={breakpoints}
-            cols={cols}
-            rowHeight={100}
-            margin={[20, 20]}
-            onLayoutChange={onLayoutChange}
-            onBreakpointChange={onBreakpointChange}
-            draggableHandle=".card-header"
-            resizeHandles={isLayoutLocked ? [] : ['se']}
-            isDraggable={!isLayoutLocked}
-            isResizable={!isLayoutLocked}
-            useCSSTransforms={true}
-            preventCollision={false}
-            compactType={null}
-          >
-            {widgets.map(widget => {
-              const widgetProps = {
-                key: widget.id,
-                onDelete: () => deleteWidget(widget.id)
-              }
-
-              switch (widget.type) {
-                case 'markdown':
-                  return (
-                    <div key={widget.id} className="widget-container">
-                      <button 
-                        className="widget-delete-btn" 
-                        onClick={() => deleteWidget(widget.id)}
-                        aria-label="Delete widget"
-                      >
-                        <X size={16} />
-                      </button>
-                      <MarkdownWidget
-                        {...widgetProps}
-                        note={markdownNotes[widget.id]}
-                        onUpdate={(updates) => updateMarkdownNote(widget.id, updates)}
-                      />
-                    </div>
-                  )
-                case 'todo':
-                  return (
-                    <div key={widget.id} className="widget-container">
-                      <button 
-                        className="widget-delete-btn" 
-                        onClick={() => deleteWidget(widget.id)}
-                        aria-label="Delete widget"
-                      >
-                        <X size={16} />
-                      </button>
-                      <TodoWidget {...widgetProps} />
-                    </div>
-                  )
-                case 'book':
-                  return (
-                    <div key={widget.id} className="widget-container">
-                      <button 
-                        className="widget-delete-btn" 
-                        onClick={() => deleteWidget(widget.id)}
-                        aria-label="Delete widget"
-                      >
-                        <X size={16} />
-                      </button>
-                      <BookWidget {...widgetProps} />
-                    </div>
-                  )
-                case 'spotify':
-                  return (
-                    <div key={widget.id} className="widget-container">
-                      <button 
-                        className="widget-delete-btn" 
-                        onClick={() => deleteWidget(widget.id)}
-                        aria-label="Delete widget"
-                      >
-                        <X size={16} />
-                      </button>
-                      <SpotifyWidget {...widgetProps} />
-                    </div>
-                  )
-                case 'photo':
-                  return (
-                    <div key={widget.id} className="widget-container">
-                      <button 
-                        className="widget-delete-btn" 
-                        onClick={() => deleteWidget(widget.id)}
-                        aria-label="Delete widget"
-                      >
-                        <X size={16} />
-                      </button>
-                      <PhotoWidget {...widgetProps} />
-                    </div>
-                  )
-                default:
-                  return null
-              }
-            })}
-          </ResponsiveGridLayout>
-        </div>
-      </div>
-    </>
+    </div>
   )
 }
 
