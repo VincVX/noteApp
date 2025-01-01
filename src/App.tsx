@@ -74,6 +74,21 @@ function AppContent() {
     }
   }
 
+  const deleteWidget = (id: string) => {
+    setWidgets(widgets.filter(widget => widget.id !== id))
+    if (markdownNotes[id]) {
+      const newMarkdownNotes = { ...markdownNotes }
+      delete newMarkdownNotes[id]
+      setMarkdownNotes(newMarkdownNotes)
+    }
+    // Remove from layouts
+    const newLayouts = { ...layouts }
+    Object.keys(newLayouts).forEach(breakpoint => {
+      newLayouts[breakpoint] = newLayouts[breakpoint].filter(layout => layout.i !== id)
+    })
+    setLayouts(newLayouts)
+  }
+
   const autoArrangeLayouts = () => {
     if (isLayoutLocked) return
 
@@ -178,23 +193,60 @@ function AppContent() {
             preventCollision={false}
             compactType={null}
           >
-            {widgets.map(widget => (
-              <div key={widget.id}>
-                {widget.type === 'markdown' && markdownNotes[widget.id] && (
-                  <MarkdownWidget 
-                    key={widget.id}
-                    note={markdownNotes[widget.id]}
-                    onUpdate={(updates) => updateMarkdownNote(widget.id, updates)}
-                  />
-                )}
-                {widget.type === 'todo' && (
-                  <TodoWidget />
-                )}
-                {widget.type === 'book' && (
-                  <BookWidget />
-                )}
-              </div>
-            ))}
+            {widgets.map(widget => {
+              const widgetProps = {
+                key: widget.id,
+                onDelete: () => deleteWidget(widget.id)
+              }
+
+              switch (widget.type) {
+                case 'markdown':
+                  return (
+                    <div key={widget.id} className="widget-container">
+                      <button 
+                        className="widget-delete-btn" 
+                        onClick={() => deleteWidget(widget.id)}
+                        aria-label="Delete widget"
+                      >
+                        <X size={16} />
+                      </button>
+                      <MarkdownWidget
+                        {...widgetProps}
+                        note={markdownNotes[widget.id]}
+                        onUpdate={(updates) => updateMarkdownNote(widget.id, updates)}
+                      />
+                    </div>
+                  )
+                case 'todo':
+                  return (
+                    <div key={widget.id} className="widget-container">
+                      <button 
+                        className="widget-delete-btn" 
+                        onClick={() => deleteWidget(widget.id)}
+                        aria-label="Delete widget"
+                      >
+                        <X size={16} />
+                      </button>
+                      <TodoWidget {...widgetProps} />
+                    </div>
+                  )
+                case 'book':
+                  return (
+                    <div key={widget.id} className="widget-container">
+                      <button 
+                        className="widget-delete-btn" 
+                        onClick={() => deleteWidget(widget.id)}
+                        aria-label="Delete widget"
+                      >
+                        <X size={16} />
+                      </button>
+                      <BookWidget {...widgetProps} />
+                    </div>
+                  )
+                default:
+                  return null
+              }
+            })}
           </ResponsiveGridLayout>
         </div>
       </div>

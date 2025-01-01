@@ -65,6 +65,7 @@ body {
 
 .card-header {
   padding: var(--paddingMedium);
+  padding-right: 8px;
   border-bottom: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
@@ -79,6 +80,7 @@ body {
   display: flex;
   align-items: center;
   gap: var(--gapSmall);
+  margin-right: auto;
 }
 
 .card-content {
@@ -94,6 +96,7 @@ body {
   cursor: pointer;
   font-size: 0.875rem;
   transition: all 0.2s;
+  margin-right: 48px;
 }
 
 .preview-button:hover {
@@ -379,6 +382,8 @@ body {
   gap: var(--gapMedium);
   align-items: center;
   margin-top: var(--gapSmall);
+  margin-bottom: var(--gapLarge);
+  padding-left: var(--paddingSmall);
 }
 
 .meta-tag {
@@ -388,6 +393,7 @@ body {
   border-radius: 12px;
   font-size: 0.75rem;
   border: 1px solid var(--color-border);
+  margin-left: var(--gapMedium);
 }
 
 /* Book Notes Styles */
@@ -806,4 +812,38 @@ body {
     text-align: center;
     min-width: 80px;
   }
+}
+
+.widget-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.widget-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  background-color: var(--color-surfaceHighlight);
+  border: 1px solid var(--color-border);
+  border-radius: var(--borderRadius);
+  padding: var(--paddingSmall) var(--paddingSmall);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: var(--color-text);
+}
+
+.widget-delete-btn:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-textMuted);
+  color: #ef4444;
+}
+
+.widget-delete-btn svg {
+  width: 16px;
+  height: 16px;
 }
