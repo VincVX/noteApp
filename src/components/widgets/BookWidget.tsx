@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Book, Plus } from 'lucide-react'
 import { Note } from '../../types'
 import { BookNote } from './BookNote'
@@ -7,7 +7,7 @@ export function BookWidget() {
   const [notes, setNotes] = useState<Note[]>([])
   const [allTags, setAllTags] = useState<string[]>([])
 
-  const addNote = () => {
+  const addNote = useCallback(() => {
     const newNote: Note = {
       id: Date.now().toString(),
       title: 'Untitled Note',
@@ -15,20 +15,37 @@ export function BookWidget() {
       tags: [],
       created: new Date().toISOString()
     }
-    setNotes([...notes, newNote])
-  }
+    setNotes(prev => [...prev, newNote])
+  }, [])
 
-  const updateNote = (updatedNote: Note) => {
+  const updateNote = useCallback((updatedNote: Note) => {
     setNotes(notes.map(note => 
       note.id === updatedNote.id ? updatedNote : note
     ))
     const newTags = new Set(allTags)
     updatedNote.tags.forEach(tag => newTags.add(tag))
     setAllTags(Array.from(newTags))
-  }
+  }, [notes, allTags])
+
+  // Handle mouse down for drag behavior
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    // Only allow dragging when clicking on the card background
+    // Prevent dragging when clicking on interactive elements
+    if (
+      target.tagName === 'BUTTON' ||
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.closest('.book-notes') ||
+      target.closest('.card-title') ||
+      target.closest('.empty-notes')
+    ) {
+      e.stopPropagation()
+    }
+  }, [])
 
   return (
-    <div className="card">
+    <div className="card" onMouseDown={handleMouseDown}>
       <div className="card-header">
         <div className="card-title">
           <Book size={18} />
