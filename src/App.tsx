@@ -9,10 +9,11 @@ import { Widget, Layout } from './types'
 import { MarkdownWidget, TodoWidget, BookWidget } from './components/widgets'
 import { Sidebar } from './components/sidebar/Sidebar'
 import { SettingsPage } from './components/settings/SettingsPage'
+import { ThemeProvider } from './contexts/ThemeContext'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
-function App() {
+function AppContent() {
   const [markdown, setMarkdown] = useState('')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -130,6 +131,14 @@ function App() {
         </div>
       </div>
     </>
+  )
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   )
 }
 
