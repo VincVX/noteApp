@@ -4,11 +4,11 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { ThemeCustomizer } from './ThemeCustomizer'
 
 interface SettingsPageProps {
-  onClose: () => void
+  readonly onClose: () => void
 }
 
 export function SettingsPage({ onClose }: SettingsPageProps) {
-  const { currentTheme, setTheme, headerImage, setHeaderImage, showHeaderImage, setShowHeaderImage } = useTheme()
+  const { currentTheme, setTheme, headerImage, setHeaderImage, setShowHeaderImage } = useTheme()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {

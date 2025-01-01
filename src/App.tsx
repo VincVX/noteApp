@@ -30,7 +30,7 @@ function AppContent() {
   const { headerImage, showHeaderImage } = useTheme()
 
   // Calculate the next available position for a new widget
-  const findNextPosition = (width: number, height: number) => {
+  const findNextPosition = (width: number) => {
     const headerGridUnits = showHeaderImage ? Math.ceil((HEADER_HEIGHT + HEADER_MARGIN) / GRID_ROW_HEIGHT) : 0
     
     if (layout.length === 0) {
@@ -58,7 +58,7 @@ function AppContent() {
     const width = isMarkdown ? 4 : 3
     const height = isMarkdown ? 8 : 6
 
-    const position = findNextPosition(width, height)
+    const position = findNextPosition(width)
     const newLayout: Layout = {
       i: id,
       ...position,
@@ -158,7 +158,7 @@ function AppContent() {
             width={1200}
             margin={snapToGrid ? [20, 20] : [0, 0]}
             containerPadding={[20, 20]}
-            onLayoutChange={() => {}}
+            onLayoutChange={(layout) => onLayoutChange(layout)}
             onDragStop={(layout) => onLayoutChange(layout)}
             onResizeStop={(layout) => onLayoutChange(layout)}
             draggableHandle=".card-header"

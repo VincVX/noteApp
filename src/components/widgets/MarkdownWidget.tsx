@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, memo, useEffect, MouseEvent } from 'react'
+import React, { useState, useCallback, useMemo, memo, useEffect, MouseEvent } from 'react'
 import { FileText, Calendar, Eye, Edit2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
@@ -162,7 +162,7 @@ export function MarkdownWidget({ note, onUpdate, onDelete }: MarkdownWidgetProps
   }, [handleKeyDown])
 
   // Handle mouse down for drag behavior
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement
     // Only allow dragging when clicking on the card background
     // Prevent dragging when clicking on interactive elements

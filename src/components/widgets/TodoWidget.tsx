@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { ListTodo } from 'lucide-react'
 import { TodoItem } from '../../types'
 
@@ -8,24 +8,44 @@ interface TodoWidgetProps {
 
 export function TodoWidget({ onDelete }: TodoWidgetProps) {
   const [todos, setTodos] = useState<TodoItem[]>([])
-  const [newTodo, setNewTodo] = useState('')
+  const [newTodoText, setNewTodoText] = useState('')
 
-  const addTodo = () => {
-    if (newTodo.trim()) {
-      setTodos([...todos, { 
-        id: Date.now().toString(), 
-        text: newTodo.trim(), 
-        completed: false 
-      }])
-      setNewTodo('')
+  const addTodo = useCallback(() => {
+    if (newTodoText.trim()) {
+      const newTodo: TodoItem = {
+        id: Date.now().toString(),
+        text: newTodoText.trim(),
+        completed: false
+      }
+      setTodos(prev => [...prev, newTodo])
+      setNewTodoText('')
     }
-  }
+  }, [newTodoText])
 
-  const toggleTodo = (id: string) => {
-    setTodos(todos.map(todo => 
+  const toggleTodo = useCallback((id: string) => {
+    setTodos(prev => prev.map(todo =>
       todo.id === id ? { ...todo, completed: !todo.completed } : todo
     ))
-  }
+  }, [])
+
+  const deleteTodo = useCallback((id: string) => {
+    setTodos(prev => prev.filter(todo => todo.id !== id))
+  }, [])
+
+  // Handle mouse down for drag behavior
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement
+    // Only allow dragging when clicking on the card background
+    // Prevent dragging when clicking on interactive elements
+    if (
+      target.tagName === 'BUTTON' ||
+      target.tagName === 'INPUT' ||
+      target.closest('.todo-list') ||
+      target.closest('.card-title')
+    ) {
+      e.stopPropagation()
+    }
+  }, [])
 
   return (
     <div className="card">
@@ -40,8 +60,8 @@ export function TodoWidget({ onDelete }: TodoWidgetProps) {
           <input
             type="text"
             className="todo-input"
-            value={newTodo}
-            onChange={(e) => setNewTodo(e.target.value)}
+            value={newTodoText}
+            onChange={(e) => setNewTodoText(e.target.value)}
             placeholder="Add a new todo..."
             onKeyDown={(e) => e.key === 'Enter' && addTodo()}
           />

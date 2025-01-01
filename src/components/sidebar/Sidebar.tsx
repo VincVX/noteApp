@@ -1,4 +1,4 @@
-import { Type, CheckSquare, Book, LayoutGrid, Settings, Lock, Music, Image, Grid } from 'lucide-react'
+import { Type, CheckSquare, Book, Settings, Lock, Music, Image, Grid } from 'lucide-react'
 import { Widget } from '../../types'
 
 interface SidebarProps {

@@ -5,8 +5,8 @@ import { RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
 import { ThemeType, themes } from '../../types/theme'
 
 interface ThemeCustomizerProps {
-  currentTheme: ThemeType
-  onThemeChange: (theme: ThemeType) => void
+  readonly currentTheme: ThemeType
+  readonly onThemeChange: (theme: ThemeType) => void
 }
 
 export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizerProps) {
@@ -156,7 +156,7 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
                     type="number"
                     min="0"
                     max="32"
-                    value={parseInt(theme.spacing.gapSmall)}
+                    value={parseInt(theme.spacing.gapSmall.replace('px', ''))}
                     onChange={(e) => handleSpacingChange('gapSmall', `${e.target.value}px`)}
                     className="number-input"
                   />
@@ -174,7 +174,7 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
                     type="number"
                     min="0"
                     max="48"
-                    value={parseInt(theme.spacing.gapMedium)}
+                    value={parseInt(theme.spacing.gapMedium.replace('px', ''))}
                     onChange={(e) => handleSpacingChange('gapMedium', `${e.target.value}px`)}
                     className="number-input"
                   />
@@ -192,7 +192,7 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
                     type="number"
                     min="0"
                     max="64"
-                    value={parseInt(theme.spacing.gapLarge)}
+                    value={parseInt(theme.spacing.gapLarge.replace('px', ''))}
                     onChange={(e) => handleSpacingChange('gapLarge', `${e.target.value}px`)}
                     className="number-input"
                   />
@@ -210,7 +210,7 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
                     type="number"
                     min="0"
                     max="24"
-                    value={parseInt(theme.spacing.borderRadius)}
+                    value={parseInt(theme.spacing.borderRadius.replace('px', ''))}
                     onChange={(e) => handleSpacingChange('borderRadius', `${e.target.value}px`)}
                     className="number-input"
                   />

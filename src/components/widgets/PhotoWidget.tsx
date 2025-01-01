@@ -38,11 +38,23 @@ export function PhotoWidget({ onDelete }: PhotoWidgetProps) {
     event.preventDefault()
   }
 
-  const handleContextMenu = (event: React.MouseEvent) => {
+  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
     if (imageUrl) {
       event.preventDefault()
       setContextMenuPosition({ x: event.clientX, y: event.clientY })
       setShowContextMenu(true)
+    }
+  }
+
+  const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement
+    if (
+      target.tagName === 'BUTTON' ||
+      target.tagName === 'INPUT' ||
+      target.closest('.preview') ||
+      target.closest('.card-title')
+    ) {
+      event.stopPropagation()
     }
   }
 

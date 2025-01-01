@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Book, Plus } from 'lucide-react'
 import { Note } from '../../types'
 import { BookNote } from './BookNote'
@@ -32,7 +32,7 @@ export function BookWidget({ onDelete }: BookWidgetProps) {
   }, [notes, allTags])
 
   // Handle mouse down for drag behavior
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement
     // Only allow dragging when clicking on the card background
     // Prevent dragging when clicking on interactive elements
