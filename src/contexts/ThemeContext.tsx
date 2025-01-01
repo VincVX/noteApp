@@ -1,50 +1,27 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { ThemeConfig, defaultLightTheme, defaultDarkTheme } from '../types/theme'
+import React, { createContext, useContext, useState, useEffect } from 'react'
+import { ThemeType, themes } from '../types/theme'
 
 interface ThemeContextType {
-  isDark: boolean
-  setIsDark: (isDark: boolean) => void
-  theme: ThemeConfig
-  updateTheme: (theme: ThemeConfig) => void
+  theme: ThemeType
+  setTheme: (theme: ThemeType) => void
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-interface ThemeProviderProps {
-  children: ReactNode
-}
-
-export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('isDark')
-    return saved ? JSON.parse(saved) : false
-  })
-
-  const [theme, setTheme] = useState<ThemeConfig>(() => {
-    const saved = localStorage.getItem('theme')
-    return saved ? JSON.parse(saved) : (isDark ? defaultDarkTheme : defaultLightTheme)
-  })
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState<ThemeType>('sage')  // Set sage as default
 
   useEffect(() => {
-    localStorage.setItem('isDark', JSON.stringify(isDark))
-    localStorage.setItem('theme', JSON.stringify(theme))
-
-    // Apply theme to root element
+    // Apply theme variables to root element
     const root = document.documentElement
-    Object.entries(theme.colors).forEach(([key, value]) => {
-      root.style.setProperty(`--color-${key}`, value)
+    const themeVars = themes[theme]
+    Object.entries(themeVars).forEach(([key, value]) => {
+      root.style.setProperty(key, value)
     })
-    Object.entries(theme.spacing).forEach(([key, value]) => {
-      root.style.setProperty(`--${key}`, value)
-    })
-  }, [isDark, theme])
-
-  const updateTheme = (newTheme: ThemeConfig) => {
-    setTheme(newTheme)
-  }
+  }, [theme])
 
   return (
-    <ThemeContext.Provider value={{ isDark, setIsDark, theme, updateTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   )

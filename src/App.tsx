@@ -6,7 +6,7 @@ import 'highlight.js/styles/github-dark.css'
 import './App.css'
 
 import { Widget, Layout, MarkdownNote } from './types'
-import { MarkdownWidget, TodoWidget, BookWidget, SpotifyWidget } from './components/widgets'
+import { MarkdownWidget, TodoWidget, BookWidget, SpotifyWidget, PhotoWidget } from './components/widgets'
 import { Sidebar } from './components/sidebar/Sidebar'
 import { SettingsPage } from './components/settings/SettingsPage'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -255,6 +255,19 @@ function AppContent() {
                         <X size={16} />
                       </button>
                       <SpotifyWidget {...widgetProps} />
+                    </div>
+                  )
+                case 'photo':
+                  return (
+                    <div key={widget.id} className="widget-container">
+                      <button 
+                        className="widget-delete-btn" 
+                        onClick={() => deleteWidget(widget.id)}
+                        aria-label="Delete widget"
+                      >
+                        <X size={16} />
+                      </button>
+                      <PhotoWidget {...widgetProps} />
                     </div>
                   )
                 default:
