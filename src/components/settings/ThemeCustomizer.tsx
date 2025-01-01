@@ -67,15 +67,24 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
         {/* Theme Selector */}
         <div className="setting-item">
           <div className="setting-label">
-            <label>Theme</label>
+            <label htmlFor="theme-selector">Theme</label>
             <div className="setting-description">Choose your preferred theme</div>
           </div>
-          <div className="theme-options">
+          <div className="theme-options" id="theme-selector" role="radiogroup" aria-label="Theme Selection">
             {Object.keys(themes).map((themeKey) => (
               <button
                 key={themeKey}
                 className={`theme-option ${currentTheme === themeKey ? 'active' : ''}`}
                 onClick={() => onThemeChange(themeKey as ThemeType)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onThemeChange(themeKey as ThemeType);
+                  }
+                }}
+                role="radio"
+                aria-checked={currentTheme === themeKey}
+                tabIndex={0}
               >
                 {themeKey.charAt(0).toUpperCase() + themeKey.slice(1)}
               </button>
@@ -88,6 +97,7 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
           <button 
             className="section-header" 
             onClick={() => toggleSection('colors')}
+            aria-expanded={expandedSections.colors}
           >
             <h4>Colors</h4>
             {expandedSections.colors ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
@@ -139,6 +149,7 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
           <button 
             className="section-header" 
             onClick={() => toggleSection('spacing')}
+            aria-expanded={expandedSections.spacing}
           >
             <h4>Spacing</h4>
             {expandedSections.spacing ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
@@ -148,11 +159,12 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
             <div className="spacing-grid">
               <div className="setting-item">
                 <div className="setting-label">
-                  <label>Small Gap</label>
+                  <label htmlFor="gap-small">Small Gap</label>
                   <div className="setting-description">Spacing between small elements</div>
                 </div>
                 <div className="spacing-input-wrapper">
                   <input
+                    id="gap-small"
                     type="number"
                     min="0"
                     max="32"
@@ -166,11 +178,12 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
 
               <div className="setting-item">
                 <div className="setting-label">
-                  <label>Medium Gap</label>
+                  <label htmlFor="gap-medium">Medium Gap</label>
                   <div className="setting-description">Spacing between medium elements</div>
                 </div>
                 <div className="spacing-input-wrapper">
                   <input
+                    id="gap-medium"
                     type="number"
                     min="0"
                     max="48"
@@ -184,11 +197,12 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
 
               <div className="setting-item">
                 <div className="setting-label">
-                  <label>Large Gap</label>
+                  <label htmlFor="gap-large">Large Gap</label>
                   <div className="setting-description">Spacing between large elements</div>
                 </div>
                 <div className="spacing-input-wrapper">
                   <input
+                    id="gap-large"
                     type="number"
                     min="0"
                     max="64"
@@ -202,11 +216,12 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
 
               <div className="setting-item">
                 <div className="setting-label">
-                  <label>Border Radius</label>
+                  <label htmlFor="border-radius">Border Radius</label>
                   <div className="setting-description">Roundness of corners</div>
                 </div>
                 <div className="spacing-input-wrapper">
                   <input
+                    id="border-radius"
                     type="number"
                     min="0"
                     max="24"

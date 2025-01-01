@@ -52,13 +52,14 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
 
             <div className="setting-item">
               <div className="setting-label">
-                <label>Header Image</label>
+                <label htmlFor="header-image-input">Header Image</label>
                 <div className="setting-description">
                   Add an image to display at the top of your canvas
                 </div>
               </div>
               <div className="setting-options">
                 <input
+                  id="header-image-input"
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}

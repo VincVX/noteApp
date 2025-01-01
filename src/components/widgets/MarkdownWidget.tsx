@@ -7,9 +7,9 @@ import remarkMath from 'remark-math'
 import { MarkdownNote } from '../../types'
 
 interface MarkdownWidgetProps {
-  note: MarkdownNote
-  onUpdate: (updates: Partial<MarkdownNote>) => void
-  onDelete: () => void
+  readonly note: MarkdownNote
+  readonly onUpdate: (updates: Partial<MarkdownNote>) => void
+  readonly onDelete: () => void
 }
 
 // Memoized header component
@@ -19,10 +19,10 @@ const WidgetHeader = memo(({
   onTitleChange, 
   onTogglePreview 
 }: { 
-  title: string
-  isPreview: boolean
-  onTitleChange: (value: string) => void
-  onTogglePreview: () => void
+  readonly title: string
+  readonly isPreview: boolean
+  readonly onTitleChange: (value: string) => void
+  readonly onTogglePreview: () => void
 }) => {
   const handlePreviewClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
@@ -31,8 +31,17 @@ const WidgetHeader = memo(({
   }
 
   return (
-    <div className="card-header">
-      <div className="card-title">
+    <div 
+      className="card-header" 
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+        }
+      }}
+    >
+      <div className="card-title" aria-label="Note title">
         <FileText size={18} />
         <input
           type="text"
@@ -66,7 +75,7 @@ const WidgetHeader = memo(({
 })
 
 // Memoized metadata component
-const MetaInfo = memo(({ created }: { created: string }) => {
+const MetaInfo = memo(({ created }: { readonly created: string }) => {
   const formattedDate = useMemo(() => new Date(created).toLocaleDateString('en-US', {
     month: '2-digit',
     day: '2-digit',
@@ -85,7 +94,7 @@ const MetaInfo = memo(({ created }: { created: string }) => {
 })
 
 // Memoized preview component
-const MarkdownPreview = memo(({ content }: { content: string }) => (
+const MarkdownPreview = memo(({ content }: { readonly content: string }) => (
   <div className="preview prose prose-invert max-w-none">
     <ReactMarkdown
       remarkPlugins={[remarkMath]}
@@ -101,8 +110,8 @@ const MarkdownEditor = memo(({
   content, 
   onChange 
 }: { 
-  content: string
-  onChange: (value: string) => void
+  readonly content: string
+  readonly onChange: (value: string) => void
 }) => (
   <textarea
     className="editor"

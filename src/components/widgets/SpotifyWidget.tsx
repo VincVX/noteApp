@@ -34,6 +34,7 @@ export function SpotifyWidget({ onDelete }: SpotifyWidgetProps) {
           width="100%"
           height="352"
           frameBorder="0"
+          title="Spotify music player"
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           loading="lazy"
         />

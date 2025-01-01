@@ -46,18 +46,6 @@ export function PhotoWidget({ onDelete }: PhotoWidgetProps) {
     }
   }
 
-  const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
-    const target = event.target as HTMLElement
-    if (
-      target.tagName === 'BUTTON' ||
-      target.tagName === 'INPUT' ||
-      target.closest('.preview') ||
-      target.closest('.card-title')
-    ) {
-      event.stopPropagation()
-    }
-  }
-
   const handleClickOutside = () => {
     setShowContextMenu(false)
   }

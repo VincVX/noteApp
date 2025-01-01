@@ -40,9 +40,9 @@ export function BookWidget({ onDelete }: BookWidgetProps) {
       target.tagName === 'BUTTON' ||
       target.tagName === 'INPUT' ||
       target.tagName === 'TEXTAREA' ||
-      target.closest('.book-notes') ||
-      target.closest('.card-title') ||
-      target.closest('.empty-notes')
+      target?.closest('.book-notes') ||
+      target?.closest('.card-title') ||
+      target?.closest('.empty-notes')
     ) {
       e.stopPropagation()
     }
@@ -51,7 +51,7 @@ export function BookWidget({ onDelete }: BookWidgetProps) {
   return (
     <div className="card" onMouseDown={handleMouseDown}>
       <div className="card-header">
-        <div className="card-title">
+        <div className="card-title" aria-label="Book notes">
           <Book size={18} />
           Book
         </div>

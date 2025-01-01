@@ -2,8 +2,8 @@ import React, { useState, useCallback } from 'react'
 import { ListTodo } from 'lucide-react'
 import { TodoItem } from '../../types'
 
-interface TodoWidgetProps {
-  onDelete: () => void
+export interface TodoWidgetProps {
+  readonly onDelete: () => void
 }
 
 export function TodoWidget({ onDelete }: TodoWidgetProps) {
@@ -32,59 +32,68 @@ export function TodoWidget({ onDelete }: TodoWidgetProps) {
     setTodos(prev => prev.filter(todo => todo.id !== id))
   }, [])
 
-  // Handle mouse down for drag behavior
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement
-    // Only allow dragging when clicking on the card background
-    // Prevent dragging when clicking on interactive elements
-    if (
-      target.tagName === 'BUTTON' ||
-      target.tagName === 'INPUT' ||
-      target.closest('.todo-list') ||
-      target.closest('.card-title')
-    ) {
-      e.stopPropagation()
-    }
-  }, [])
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault()
+    addTodo()
+  }, [addTodo])
 
   return (
-    <div className="card">
-      <div className="card-header">
+    <section className="card" aria-label="Todo list widget">
+      <header className="card-header">
         <div className="card-title">
-          <ListTodo size={18} />
-          Todo List
+          <ListTodo size={18} aria-hidden="true" />
+          <span>Todo List</span>
         </div>
-      </div>
+        <button 
+          className="widget-delete-btn"
+          onClick={onDelete}
+          aria-label="Delete todo widget"
+        >
+          ✕
+        </button>
+      </header>
       <div className="card-content">
-        <div className="todo-input-group">
+        <form 
+          className="todo-input-group" 
+          onSubmit={handleSubmit}
+          role="form"
+          aria-label="Add todo form"
+        >
           <input
             type="text"
             className="todo-input"
             value={newTodoText}
             onChange={(e) => setNewTodoText(e.target.value)}
             placeholder="Add a new todo..."
-            onKeyDown={(e) => e.key === 'Enter' && addTodo()}
+            aria-label="New todo text"
           />
-          <button className="add-todo-button" onClick={addTodo}>
+          <button 
+            type="submit" 
+            className="add-todo-button"
+            aria-label="Add todo"
+          >
             Add
           </button>
-        </div>
-        <div className="todo-list">
+        </form>
+        <ul className="todo-list" role="list">
           {todos.map(todo => (
-            <div key={todo.id} className="todo-item">
-              <div
+            <li key={todo.id} className="todo-item">
+              <button
                 className="todo-checkbox"
                 onClick={() => toggleTodo(todo.id)}
+                aria-label={`Mark "${todo.text}" as ${todo.completed ? 'incomplete' : 'complete'}`}
+                aria-pressed={todo.completed}
+                type="button"
               >
                 {todo.completed && '✓'}
-              </div>
+              </button>
               <span className={`todo-text ${todo.completed ? 'completed' : ''}`}>
                 {todo.text}
               </span>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
-    </div>
+    </section>
   )
 } 
