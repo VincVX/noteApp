@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
 import rehypeHighlight from 'rehype-highlight'
 import remarkMath from 'remark-math'
-import { Menu, X, FileText, Calendar, CheckSquare, Plus, ListTodo, Type, LayoutGrid, Book, Hash, Search } from 'lucide-react'
+import { Menu, X, FileText, Calendar, CheckSquare, Plus, ListTodo, Type, LayoutGrid, Book, Hash, Search, Settings } from 'lucide-react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 import 'katex/dist/katex.min.css'
 import 'highlight.js/styles/github-dark.css'
@@ -273,6 +273,14 @@ function BookNote({
   const [isPreview, setIsPreview] = useState(false)
   const [isCommandOpen, setIsCommandOpen] = useState(false)
 
+  const formattedDate = new Date(note.created).toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+
   const addTag = (tag: string) => {
     if (!note.tags.includes(tag)) {
       onUpdate({
@@ -305,6 +313,12 @@ function BookNote({
         >
           {isPreview ? 'Edit' : 'Preview'}
         </button>
+      </div>
+      <div className="note-meta">
+        <span className="note-timestamp">
+          <Calendar size={14} style={{ display: 'inline', marginRight: '4px' }} />
+          {formattedDate}
+        </span>
       </div>
       <div className="note-tags">
         {note.tags.map(tag => (
@@ -414,9 +428,149 @@ function BookWidget() {
   )
 }
 
+function SettingsPage({ onClose }: { onClose: () => void }) {
+  const [theme, setTheme] = useState('dark')
+  const [fontSize, setFontSize] = useState('14')
+  const [dateFormat, setDateFormat] = useState('MM/DD/YYYY')
+  const [timeFormat, setTimeFormat] = useState('12')
+
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
+  }
+
+  const handleFontSizeChange = (newSize: string) => {
+    setFontSize(newSize)
+    document.documentElement.style.setProperty('--base-font-size', `${newSize}px`)
+  }
+
+  return (
+    <div className="settings-page">
+      <div className="settings-header">
+        <div className="settings-title">
+          <Settings size={24} />
+          <h1>Settings</h1>
+        </div>
+        <button 
+          className="close-button"
+          onClick={onClose}
+          aria-label="Close settings"
+        >
+          <X size={24} />
+        </button>
+      </div>
+      <div className="settings-content">
+        <div className="settings-section">
+          <h2>Appearance</h2>
+          <div className="setting-group">
+            <div className="setting-item">
+              <div className="setting-label">
+                <label>Theme</label>
+                <span className="setting-description">Choose your preferred color theme</span>
+              </div>
+              <div className="setting-options">
+                <button 
+                  className={`setting-option ${theme === 'dark' ? 'active' : ''}`}
+                  onClick={() => handleThemeChange('dark')}
+                >
+                  Dark
+                </button>
+                <button 
+                  className={`setting-option ${theme === 'light' ? 'active' : ''}`}
+                  onClick={() => handleThemeChange('light')}
+                >
+                  Light
+                </button>
+              </div>
+            </div>
+            <div className="setting-item">
+              <div className="setting-label">
+                <label>Font Size</label>
+                <span className="setting-description">Adjust the application font size</span>
+              </div>
+              <div className="setting-options">
+                <button 
+                  className={`setting-option ${fontSize === '12' ? 'active' : ''}`}
+                  onClick={() => handleFontSizeChange('12')}
+                >
+                  Small
+                </button>
+                <button 
+                  className={`setting-option ${fontSize === '14' ? 'active' : ''}`}
+                  onClick={() => handleFontSizeChange('14')}
+                >
+                  Medium
+                </button>
+                <button 
+                  className={`setting-option ${fontSize === '16' ? 'active' : ''}`}
+                  onClick={() => handleFontSizeChange('16')}
+                >
+                  Large
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="settings-section">
+          <h2>Date & Time</h2>
+          <div className="setting-group">
+            <div className="setting-item">
+              <div className="setting-label">
+                <label>Date Format</label>
+                <span className="setting-description">Choose how dates are displayed</span>
+              </div>
+              <div className="setting-options">
+                <button 
+                  className={`setting-option ${dateFormat === 'MM/DD/YYYY' ? 'active' : ''}`}
+                  onClick={() => setDateFormat('MM/DD/YYYY')}
+                >
+                  MM/DD/YYYY
+                </button>
+                <button 
+                  className={`setting-option ${dateFormat === 'DD/MM/YYYY' ? 'active' : ''}`}
+                  onClick={() => setDateFormat('DD/MM/YYYY')}
+                >
+                  DD/MM/YYYY
+                </button>
+                <button 
+                  className={`setting-option ${dateFormat === 'YYYY-MM-DD' ? 'active' : ''}`}
+                  onClick={() => setDateFormat('YYYY-MM-DD')}
+                >
+                  YYYY-MM-DD
+                </button>
+              </div>
+            </div>
+            <div className="setting-item">
+              <div className="setting-label">
+                <label>Time Format</label>
+                <span className="setting-description">Choose 12 or 24-hour time format</span>
+              </div>
+              <div className="setting-options">
+                <button 
+                  className={`setting-option ${timeFormat === '12' ? 'active' : ''}`}
+                  onClick={() => setTimeFormat('12')}
+                >
+                  12-hour
+                </button>
+                <button 
+                  className={`setting-option ${timeFormat === '24' ? 'active' : ''}`}
+                  onClick={() => setTimeFormat('24')}
+                >
+                  24-hour
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [markdown, setMarkdown] = useState('')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [widgets, setWidgets] = useState<Widget[]>([])
   const [layouts, setLayouts] = useState<{ [key: string]: Layout[] }>({})
   const [currentBreakpoint, setCurrentBreakpoint] = useState('')
@@ -509,8 +663,18 @@ function App() {
               <LayoutGrid size={16} /> Auto Arrange
             </button>
           </div>
+          <div>
+            <h2>Application</h2>
+            <button className="add-widget-button" onClick={() => setIsSettingsOpen(true)}>
+              <Settings size={16} /> Settings
+            </button>
+          </div>
         </div>
       </div>
+
+      {isSettingsOpen && (
+        <SettingsPage onClose={() => setIsSettingsOpen(false)} />
+      )}
 
       <div className={`main-content ${isSidebarOpen ? 'shifted' : ''}`}>
         <div className="container">
