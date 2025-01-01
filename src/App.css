@@ -302,7 +302,8 @@ body {
   padding-left: 76px;
   transition: padding-left 0.3s ease-in-out;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .app.sidebar-open .main-content {
@@ -1035,6 +1036,7 @@ body {
 
 .header-image {
   width: calc(100% - 40px);
+  min-width: 1160px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1044,8 +1046,14 @@ body {
 }
 
 .canvas {
-  padding: 20px;
   height: 100%;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+}
+
+.layout {
+  min-width: 1200px !important;
+  margin: 0 auto;
 }
 

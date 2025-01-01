@@ -12,19 +12,18 @@ import { SettingsPage } from './components/settings/SettingsPage'
 import { ThemeProvider, useTheme } from './contexts/ThemeContext'
 import { SpotifyProvider } from './contexts/SpotifyContext'
 
-const ResponsiveGridLayout = WidthProvider(Responsive)
+const GridLayout = WidthProvider(Responsive)
 
 const HEADER_HEIGHT = 200 // Height in pixels for the header image region
+const GRID_COLS = 12 // Fixed number of columns
 
 function AppContent() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [widgets, setWidgets] = useState<Widget[]>([])
   const [markdownNotes, setMarkdownNotes] = useState<{ [key: string]: MarkdownNote }>({})
-  const [layouts, setLayouts] = useState<{ [key: string]: Layout[] }>({})
-  const [currentBreakpoint, setCurrentBreakpoint] = useState('')
+  const [layout, setLayout] = useState<Layout[]>([])
   const [isLayoutLocked, setIsLayoutLocked] = useState(false)
-  const [lockedLayout, setLockedLayout] = useState<Layout[] | null>(null)
   const { headerImage, showHeaderImage } = useTheme()
 
   const getDefaultLayout = (id: string, type: Widget['type']): Layout => {
@@ -33,8 +32,10 @@ function AppContent() {
       i: id,
       x: 0,
       y: showHeaderImage ? HEADER_HEIGHT / 50 : 0,
-      w: isMarkdown ? 2 : 1,
+      w: isMarkdown ? 4 : 3,
       h: isMarkdown ? 8 : 6,
+      minW: isMarkdown ? 4 : 3,
+      minH: isMarkdown ? 6 : 4,
     }
   }
 
@@ -42,6 +43,11 @@ function AppContent() {
     const id = Date.now().toString()
     const newWidget = { id, type }
     setWidgets([...widgets, newWidget])
+    
+    // Add the new widget's layout
+    const newLayout = getDefaultLayout(id, type)
+    setLayout([...layout, newLayout])
+
     if (type === 'markdown') {
       setMarkdownNotes(prev => ({
         ...prev,
@@ -62,24 +68,18 @@ function AppContent() {
     }))
   }
 
-  const onLayoutChange = (currentLayout: Layout[], allLayouts: { [key: string]: Layout[] }) => {
+  const onLayoutChange = (newLayout: Layout[]) => {
     if (showHeaderImage) {
       const headerRegionHeight = HEADER_HEIGHT / 50
-      const adjustedLayout = currentLayout.map(item => {
+      const adjustedLayout = newLayout.map(item => {
         if (item.y < headerRegionHeight) {
           return { ...item, y: headerRegionHeight }
         }
         return item
       })
-      setLayouts({ ...allLayouts, [currentBreakpoint]: adjustedLayout })
+      setLayout(adjustedLayout)
     } else {
-      setLayouts({ ...allLayouts, [currentBreakpoint]: currentLayout })
-    }
-  }
-
-  const onBreakpointChange = (newBreakpoint: string) => {
-    if (!isLayoutLocked) {
-      setCurrentBreakpoint(newBreakpoint)
+      setLayout(newLayout)
     }
   }
 
@@ -90,75 +90,37 @@ function AppContent() {
       delete newMarkdownNotes[id]
       setMarkdownNotes(newMarkdownNotes)
     }
-    // Remove from layouts
-    const newLayouts = { ...layouts }
-    Object.keys(newLayouts).forEach(breakpoint => {
-      newLayouts[breakpoint] = newLayouts[breakpoint].filter(layout => layout.i !== id)
-    })
-    setLayouts(newLayouts)
+    setLayout(layout.filter(item => item.i !== id))
   }
 
   const autoArrangeLayouts = () => {
     if (isLayoutLocked) return
 
-    const cols = {
-      lg: 4,
-      md: 3,
-      sm: 2,
-      xs: 1,
-      xxs: 1
-    }[currentBreakpoint] || 4
-
-    const newLayouts = widgets.map((widget, index) => {
+    const newLayout = widgets.map((widget, index) => {
       const isMarkdown = widget.type === 'markdown'
-      const w = isMarkdown ? Math.min(2, cols) : 1
-      const x = (index % cols) * w
-      const y = Math.floor(index / cols) * (isMarkdown ? 8 : 6)
+      const w = isMarkdown ? 4 : 3
+      const h = isMarkdown ? 8 : 6
+      const itemsPerRow = Math.floor(GRID_COLS / w)
+      const x = (index % itemsPerRow) * w
+      const y = Math.floor(index / itemsPerRow) * h + (showHeaderImage ? HEADER_HEIGHT / 50 : 0)
 
       return {
         i: widget.id,
         x,
         y,
         w,
-        h: isMarkdown ? 8 : 6
+        h,
+        minW: isMarkdown ? 4 : 3,
+        minH: isMarkdown ? 6 : 4,
       }
     })
 
-    setLayouts({
-      ...layouts,
-      [currentBreakpoint]: newLayouts
-    })
-    setLockedLayout(newLayouts)
+    setLayout(newLayout)
   }
 
   const toggleLayoutLock = () => {
-    const newIsLocked = !isLayoutLocked
-    setIsLayoutLocked(newIsLocked)
-    
-    if (newIsLocked) {
-      // When locking, store current layout
-      const currentLayout = layouts[currentBreakpoint] || []
-      setLockedLayout(currentLayout)
-    } else {
-      // When unlocking, keep the current layout but allow changes
-      setLockedLayout(null)
-    }
+    setIsLayoutLocked(!isLayoutLocked)
   }
-
-  // When locked, use a single breakpoint layout
-  const currentLayouts = isLayoutLocked && lockedLayout ? 
-    { lg: lockedLayout } :
-    layouts
-
-  // When locked, use only the largest breakpoint
-  const breakpoints = isLayoutLocked ? 
-    { lg: 0, md: 0, sm: 0, xs: 0, xxs: 0 } : 
-    { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }
-
-  // When locked, use single column configuration
-  const cols = isLayoutLocked ? 
-    { lg: 4, md: 4, sm: 4, xs: 4, xxs: 4 } : 
-    { lg: 4, md: 3, sm: 2, xs: 1, xxs: 1 }
 
   return (
     <div className={`app ${isSidebarOpen ? 'sidebar-open' : ''}`}>
@@ -182,23 +144,24 @@ function AppContent() {
 
       <div className="main-content">
         <div className="canvas">
-          <ResponsiveGridLayout
+          <GridLayout
             className="layout"
-            layouts={currentLayouts}
-            breakpoints={breakpoints}
-            cols={cols}
+            layouts={{ lg: layout }}
+            breakpoints={{ lg: 1200 }}
+            cols={{ lg: GRID_COLS }}
             rowHeight={50}
             margin={[20, 20]}
-            onLayoutChange={onLayoutChange}
-            onBreakpointChange={onBreakpointChange}
+            containerPadding={[20, 20]}
+            onLayoutChange={(_, layouts) => onLayoutChange(layouts.lg)}
             draggableHandle=".card-header"
             resizeHandles={isLayoutLocked ? [] : ['se']}
             isDraggable={!isLayoutLocked}
             isResizable={!isLayoutLocked}
             useCSSTransforms={true}
-            preventCollision={false}
-            compactType="vertical"
-            containerPadding={[20, 20]}
+            preventCollision={true}
+            compactType={null}
+            isBounded={true}
+            allowOverlap={false}
           >
             {widgets.map(widget => (
               <div key={widget.id} className="widget-container">
@@ -243,7 +206,7 @@ function AppContent() {
                 )}
               </div>
             ))}
-          </ResponsiveGridLayout>
+          </GridLayout>
         </div>
       </div>
 
