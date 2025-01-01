@@ -29,4 +29,11 @@ export interface Note {
   content: string
   tags: string[]
   created: string
+}
+
+export interface MarkdownNote {
+  id: string
+  title: string
+  content: string
+  created: string
 } 

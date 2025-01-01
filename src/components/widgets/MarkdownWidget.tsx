@@ -4,15 +4,17 @@ import ReactMarkdown from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
 import rehypeHighlight from 'rehype-highlight'
 import remarkMath from 'remark-math'
+import { MarkdownNote } from '../../types'
 
 interface MarkdownWidgetProps {
-  markdown: string
-  setMarkdown: (value: string) => void
+  note: MarkdownNote
+  onUpdate: (updates: Partial<MarkdownNote>) => void
 }
 
-export function MarkdownWidget({ markdown, setMarkdown }: MarkdownWidgetProps) {
+export function MarkdownWidget({ note, onUpdate }: MarkdownWidgetProps) {
   const [isPreview, setIsPreview] = useState(false)
-  const currentDate = new Date().toLocaleDateString('en-US', {
+
+  const formattedDate = new Date(note.created).toLocaleDateString('en-US', {
     month: '2-digit',
     day: '2-digit',
     year: 'numeric'
@@ -23,7 +25,13 @@ export function MarkdownWidget({ markdown, setMarkdown }: MarkdownWidgetProps) {
       <div className="card-header">
         <div className="card-title">
           <FileText size={18} />
-          Untitled Note
+          <input
+            type="text"
+            value={note.title}
+            onChange={(e) => onUpdate({ title: e.target.value })}
+            placeholder="Untitled Note"
+            className="note-title-input"
+          />
         </div>
         <button 
           className="preview-button"
@@ -36,7 +44,7 @@ export function MarkdownWidget({ markdown, setMarkdown }: MarkdownWidgetProps) {
         <div className="meta-info">
           <span>
             <Calendar size={14} style={{ display: 'inline', marginRight: '4px' }} /> 
-            Created: {currentDate}
+            Created: {formattedDate}
           </span>
           <span className="meta-tag">markdown</span>
         </div>
@@ -46,16 +54,16 @@ export function MarkdownWidget({ markdown, setMarkdown }: MarkdownWidgetProps) {
               remarkPlugins={[remarkMath]}
               rehypePlugins={[rehypeKatex, rehypeHighlight]}
             >
-              {markdown}
+              {note.content}
             </ReactMarkdown>
           </div>
         ) : (
           <textarea
             className="editor"
-            value={markdown}
-            onChange={(e) => setMarkdown(e.target.value)}
+            value={note.content}
+            onChange={(e) => onUpdate({ content: e.target.value })}
             placeholder="Write your markdown here... 
-            
+
 Supports:
 - LaTeX: $E = mc^2$
 - Code blocks: ```python

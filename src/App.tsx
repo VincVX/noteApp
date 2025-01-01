@@ -5,7 +5,7 @@ import 'katex/dist/katex.min.css'
 import 'highlight.js/styles/github-dark.css'
 import './App.css'
 
-import { Widget, Layout } from './types'
+import { Widget, Layout, MarkdownNote } from './types'
 import { MarkdownWidget, TodoWidget, BookWidget } from './components/widgets'
 import { Sidebar } from './components/sidebar/Sidebar'
 import { SettingsPage } from './components/settings/SettingsPage'
@@ -14,10 +14,10 @@ import { ThemeProvider } from './contexts/ThemeContext'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 function AppContent() {
-  const [markdown, setMarkdown] = useState('')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [widgets, setWidgets] = useState<Widget[]>([])
+  const [markdownNotes, setMarkdownNotes] = useState<{ [key: string]: MarkdownNote }>({})
   const [layouts, setLayouts] = useState<{ [key: string]: Layout[] }>({})
   const [currentBreakpoint, setCurrentBreakpoint] = useState('')
   const [isLayoutLocked, setIsLayoutLocked] = useState(false)
@@ -38,6 +38,24 @@ function AppContent() {
     const id = Date.now().toString()
     const newWidget = { id, type }
     setWidgets([...widgets, newWidget])
+    if (type === 'markdown') {
+      setMarkdownNotes(prev => ({
+        ...prev,
+        [id]: {
+          id,
+          title: 'Untitled Note',
+          content: '',
+          created: new Date().toISOString()
+        }
+      }))
+    }
+  }
+
+  const updateMarkdownNote = (id: string, updates: Partial<MarkdownNote>) => {
+    setMarkdownNotes(prev => ({
+      ...prev,
+      [id]: { ...prev[id], ...updates }
+    }))
   }
 
   const onLayoutChange = (currentLayout: Layout[], allLayouts: { [key: string]: Layout[] }) => {
@@ -162,8 +180,12 @@ function AppContent() {
           >
             {widgets.map(widget => (
               <div key={widget.id}>
-                {widget.type === 'markdown' && (
-                  <MarkdownWidget markdown={markdown} setMarkdown={setMarkdown} />
+                {widget.type === 'markdown' && markdownNotes[widget.id] && (
+                  <MarkdownWidget 
+                    key={widget.id}
+                    note={markdownNotes[widget.id]}
+                    onUpdate={(updates) => updateMarkdownNote(widget.id, updates)}
+                  />
                 )}
                 {widget.type === 'todo' && (
                   <TodoWidget />
