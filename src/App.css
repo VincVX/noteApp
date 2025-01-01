@@ -275,11 +275,23 @@ body {
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s;
+  margin: 6px;
 }
 
 .add-widget-button:hover {
   background-color: var(--color-surface);
   border-color: var(--color-textMuted);
+}
+
+.add-widget-button.active {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+  margin: 6px;
+}
+
+.add-widget-button.active:hover {
+  opacity: 0.9;
 }
 
 .main-content {

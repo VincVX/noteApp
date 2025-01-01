@@ -1,4 +1,4 @@
-import { Type, CheckSquare, Book, LayoutGrid, Settings } from 'lucide-react'
+import { Type, CheckSquare, Book, LayoutGrid, Settings, Lock } from 'lucide-react'
 import { Widget } from '../../types'
 
 interface SidebarProps {
@@ -6,9 +6,11 @@ interface SidebarProps {
   onAddWidget: (type: Widget['type']) => void
   onAutoArrange: () => void
   onOpenSettings: () => void
+  isLayoutLocked: boolean
+  onToggleLayoutLock: () => void
 }
 
-export function Sidebar({ isOpen, onAddWidget, onAutoArrange, onOpenSettings }: SidebarProps) {
+export function Sidebar({ isOpen, onAddWidget, onAutoArrange, onOpenSettings, isLayoutLocked, onToggleLayoutLock }: SidebarProps) {
   return (
     <div className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-content">
@@ -30,6 +32,12 @@ export function Sidebar({ isOpen, onAddWidget, onAutoArrange, onOpenSettings }: 
           <h2>Layout</h2>
           <button className="add-widget-button" onClick={onAutoArrange}>
             <LayoutGrid size={16} /> Auto Arrange
+          </button>
+          <button 
+            className={`add-widget-button ${isLayoutLocked ? 'active' : ''}`} 
+            onClick={onToggleLayoutLock}
+          >
+            <Lock size={16} /> {isLayoutLocked ? 'Unlock Sizes' : 'Lock Sizes'}
           </button>
         </div>
         <div>
