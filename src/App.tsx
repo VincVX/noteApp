@@ -6,10 +6,11 @@ import 'highlight.js/styles/github-dark.css'
 import './App.css'
 
 import { Widget, Layout, MarkdownNote } from './types'
-import { MarkdownWidget, TodoWidget, BookWidget } from './components/widgets'
+import { MarkdownWidget, TodoWidget, BookWidget, SpotifyWidget } from './components/widgets'
 import { Sidebar } from './components/sidebar/Sidebar'
 import { SettingsPage } from './components/settings/SettingsPage'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { SpotifyProvider } from './contexts/SpotifyContext'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -243,6 +244,19 @@ function AppContent() {
                       <BookWidget {...widgetProps} />
                     </div>
                   )
+                case 'spotify':
+                  return (
+                    <div key={widget.id} className="widget-container">
+                      <button 
+                        className="widget-delete-btn" 
+                        onClick={() => deleteWidget(widget.id)}
+                        aria-label="Delete widget"
+                      >
+                        <X size={16} />
+                      </button>
+                      <SpotifyWidget {...widgetProps} />
+                    </div>
+                  )
                 default:
                   return null
               }
@@ -257,7 +271,9 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <SpotifyProvider>
+        <AppContent />
+      </SpotifyProvider>
     </ThemeProvider>
   )
 }

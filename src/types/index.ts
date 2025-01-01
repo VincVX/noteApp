@@ -1,12 +1,6 @@
-export interface Widget {
+export type Widget = {
   id: string
-  type: 'markdown' | 'todo' | 'book'
-  layout?: {
-    x: number
-    y: number
-    w: number
-    h: number
-  }
+  type: 'markdown' | 'todo' | 'book' | 'spotify'
 }
 
 export interface TodoItem {

@@ -847,3 +847,114 @@ body {
   width: 16px;
   height: 16px;
 }
+
+/* Spotify Widget Styles */
+.spotify-form {
+  display: flex;
+  gap: var(--gapSmall);
+  margin-bottom: var(--gapMedium);
+}
+
+.spotify-input {
+  flex: 1;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--borderRadius);
+  padding: var(--paddingSmall) var(--paddingMedium);
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.spotify-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.spotify-submit {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  padding: var(--paddingSmall) var(--paddingMedium);
+  border-radius: var(--borderRadius);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.spotify-submit:hover {
+  opacity: 0.9;
+}
+
+.spotify-embed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gapMedium);
+}
+
+.spotify-change-url {
+  background-color: var(--color-surfaceHighlight);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: var(--paddingSmall) var(--paddingMedium);
+  border-radius: var(--borderRadius);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  width: fit-content;
+}
+
+.spotify-change-url:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-textMuted);
+}
+
+/* Spotify Authentication Styles */
+.spotify-auth-btn {
+  background-color: transparent;
+  border: none;
+  color: var(--color-text);
+  padding: var(--paddingSmall);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-right: var(--gapSmall);
+}
+
+.spotify-auth-btn:hover {
+  color: var(--color-primary);
+}
+
+.spotify-login-prompt {
+  text-align: center;
+  padding: var(--paddingLarge);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--borderRadius);
+  margin-bottom: var(--gapLarge);
+}
+
+.spotify-login-prompt p {
+  color: var(--color-textMuted);
+  margin-bottom: var(--gapMedium);
+}
+
+.spotify-login-btn {
+  background-color: #1DB954;  /* Spotify green */
+  color: white;
+  border: none;
+  padding: var(--paddingSmall) var(--paddingLarge);
+  border-radius: var(--borderRadius);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--gapSmall);
+  margin: 0 auto;
+  transition: all 0.2s;
+}
+
+.spotify-login-btn:hover {
+  background-color: #1ed760;  /* Lighter Spotify green */
+}

@@ -1,4 +1,4 @@
-import { Type, CheckSquare, Book, LayoutGrid, Settings, Lock } from 'lucide-react'
+import { Type, CheckSquare, Book, LayoutGrid, Settings, Lock, Music } from 'lucide-react'
 import { Widget } from '../../types'
 
 interface SidebarProps {
@@ -25,6 +25,9 @@ export function Sidebar({ isOpen, onAddWidget, onAutoArrange, onOpenSettings, is
             </button>
             <button className="add-widget-button" onClick={() => onAddWidget('book')}>
               <Book size={16} /> Add Book
+            </button>
+            <button className="add-widget-button" onClick={() => onAddWidget('spotify')}>
+              <Music size={16} /> Add Spotify
             </button>
           </div>
         </div>
