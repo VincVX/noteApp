@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { ColorPicker } from './ColorPicker'
 import { RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'

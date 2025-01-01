@@ -2,19 +2,17 @@ import { Type, CheckSquare, Book, Settings, Lock, Music, Image, Grid } from 'luc
 import { Widget } from '../../types'
 
 interface SidebarProps {
-  isOpen: boolean
-  onClose: () => void
-  onAddWidget: (type: Widget['type']) => void
-  onSnapToGrid: () => void
-  isSnapToGridEnabled: boolean
-  onOpenSettings: () => void
-  isLayoutLocked: boolean
-  onToggleLayoutLock: () => void
+  readonly isOpen: boolean
+  readonly onAddWidget: (type: Widget['type']) => void
+  readonly onSnapToGrid: () => void
+  readonly isSnapToGridEnabled: boolean
+  readonly onOpenSettings: () => void
+  readonly isLayoutLocked: boolean
+  readonly onToggleLayoutLock: () => void
 }
 
 export function Sidebar({ 
   isOpen, 
-  onClose, 
   onAddWidget, 
   onSnapToGrid,
   isSnapToGridEnabled,
