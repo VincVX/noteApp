@@ -1,17 +1,27 @@
-import { Type, CheckSquare, Book, LayoutGrid, Settings, Lock, Music, Image } from 'lucide-react'
+import { Type, CheckSquare, Book, LayoutGrid, Settings, Lock, Music, Image, Grid } from 'lucide-react'
 import { Widget } from '../../types'
 
 interface SidebarProps {
   isOpen: boolean
   onClose: () => void
   onAddWidget: (type: Widget['type']) => void
-  onAutoArrange: () => void
+  onSnapToGrid: () => void
+  isSnapToGridEnabled: boolean
   onOpenSettings: () => void
   isLayoutLocked: boolean
   onToggleLayoutLock: () => void
 }
 
-export function Sidebar({ isOpen, onClose, onAddWidget, onAutoArrange, onOpenSettings, isLayoutLocked, onToggleLayoutLock }: SidebarProps) {
+export function Sidebar({ 
+  isOpen, 
+  onClose, 
+  onAddWidget, 
+  onSnapToGrid,
+  isSnapToGridEnabled,
+  onOpenSettings, 
+  isLayoutLocked, 
+  onToggleLayoutLock 
+}: SidebarProps) {
   return (
     <div className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-content">
@@ -37,14 +47,17 @@ export function Sidebar({ isOpen, onClose, onAddWidget, onAutoArrange, onOpenSet
         </div>
         <div>
           <h2>Layout</h2>
-          <button className="add-widget-button" onClick={onAutoArrange}>
-            <LayoutGrid size={16} /> Auto Arrange
+          <button 
+            className={`add-widget-button ${isSnapToGridEnabled ? 'active' : ''}`} 
+            onClick={onSnapToGrid}
+          >
+            <Grid size={16} /> {isSnapToGridEnabled ? 'Free Placement' : 'Snap to Grid'}
           </button>
           <button 
             className={`add-widget-button ${isLayoutLocked ? 'active' : ''}`} 
             onClick={onToggleLayoutLock}
           >
-            <Lock size={16} /> {isLayoutLocked ? 'Unlock Sizes' : 'Lock Sizes'}
+            <Lock size={16} /> {isLayoutLocked ? 'Unlock Layout' : 'Lock Layout'}
           </button>
         </div>
         <div>

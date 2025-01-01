@@ -17,6 +17,10 @@ export interface Layout {
   h: number
   minW?: number
   minH?: number
+  maxY?: number
+  isResizable?: boolean
+  isDraggable?: boolean
+  static?: boolean
 }
 
 export interface Note {

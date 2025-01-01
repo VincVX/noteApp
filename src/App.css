@@ -1037,12 +1037,14 @@ body {
 .header-image {
   width: calc(100% - 40px);
   min-width: 1160px;
+  height: 75px !important;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  margin: 20px;
+  margin: 5px 20px 0 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .canvas {
