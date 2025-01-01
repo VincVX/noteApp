@@ -1,21 +1,15 @@
 import React, { useRef } from 'react'
 import { X, Upload, Trash2 } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
-import { ThemeType } from '../../types/theme'
+import { ThemeCustomizer } from './ThemeCustomizer'
 
 interface SettingsPageProps {
   onClose: () => void
 }
 
 export function SettingsPage({ onClose }: SettingsPageProps) {
-  const { theme, setTheme, headerImage, setHeaderImage, showHeaderImage, setShowHeaderImage } = useTheme()
+  const { currentTheme, setTheme, headerImage, setHeaderImage, showHeaderImage, setShowHeaderImage } = useTheme()
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const themeOptions: { value: ThemeType; label: string }[] = [
-    { value: 'light', label: 'Light' },
-    { value: 'dark', label: 'Dark' },
-    { value: 'sage', label: 'Sage' },
-  ]
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -51,25 +45,10 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
         <div className="settings-section">
           <h2>Appearance</h2>
           <div className="setting-group">
-            <div className="setting-item">
-              <div className="setting-label">
-                <label>Theme</label>
-                <div className="setting-description">
-                  Choose your preferred theme
-                </div>
-              </div>
-              <div className="setting-options">
-                {themeOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    className={`setting-option ${theme === option.value ? 'active' : ''}`}
-                    onClick={() => setTheme(option.value)}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <ThemeCustomizer 
+              currentTheme={currentTheme}
+              onThemeChange={setTheme}
+            />
 
             <div className="setting-item">
               <div className="setting-label">
@@ -79,42 +58,39 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
                 </div>
               </div>
               <div className="setting-options">
-                <div className="header-image-controls">
-                  <input
-                    type="checkbox"
-                    id="show-header"
-                    checked={showHeaderImage}
-                    onChange={(e) => setShowHeaderImage(e.target.checked)}
-                  />
-                  <label htmlFor="show-header">Display header image</label>
-                  
-                  <div className="header-image-upload">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      ref={fileInputRef}
-                      style={{ display: 'none' }}
-                    />
-                    <button 
-                      className="upload-button"
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  style={{ display: 'none' }}
+                  ref={fileInputRef}
+                />
+                {!headerImage ? (
+                  <button
+                    className="setting-option"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload size={16} />
+                    Upload Image
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      className="setting-option"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={!showHeaderImage}
                     >
                       <Upload size={16} />
-                      Upload Image
+                      Change Image
                     </button>
-                    {headerImage && (
-                      <button 
-                        className="remove-button"
-                        onClick={handleRemoveImage}
-                      >
-                        <Trash2 size={16} />
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                </div>
+                    <button
+                      className="setting-option"
+                      onClick={handleRemoveImage}
+                    >
+                      <Trash2 size={16} />
+                      Remove
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

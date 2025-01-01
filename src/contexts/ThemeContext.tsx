@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { ThemeType, themes } from '../types/theme'
+import { Theme, ThemeType, themes, themeToVariables } from '../types/theme'
 
 interface ThemeContextType {
-  theme: ThemeType
+  theme: Theme
+  currentTheme: ThemeType
   setTheme: (theme: ThemeType) => void
+  updateTheme: (theme: Theme) => void
   headerImage: string | null
   setHeaderImage: (image: string | null) => void
   showHeaderImage: boolean
@@ -13,28 +15,40 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<ThemeType>('sage')  // Set sage as default
+  const [currentTheme, setCurrentTheme] = useState<ThemeType>('dark')
+  const [theme, setThemeState] = useState<Theme>(themes[currentTheme])
   const [headerImage, setHeaderImage] = useState<string | null>(null)
   const [showHeaderImage, setShowHeaderImage] = useState(false)
 
+  const setTheme = (newTheme: ThemeType) => {
+    setCurrentTheme(newTheme)
+    setThemeState(themes[newTheme])
+  }
+
+  const updateTheme = (newTheme: Theme) => {
+    setThemeState(newTheme)
+  }
+
   useEffect(() => {
-    // Apply theme variables to root element
-    const root = document.documentElement
-    const themeVars = themes[theme]
-    Object.entries(themeVars).forEach(([key, value]) => {
-      root.style.setProperty(key, value)
+    const variables = themeToVariables(theme)
+    Object.entries(variables).forEach(([key, value]) => {
+      document.documentElement.style.setProperty(key, value)
     })
   }, [theme])
 
   return (
-    <ThemeContext.Provider value={{ 
-      theme, 
-      setTheme, 
-      headerImage, 
-      setHeaderImage, 
-      showHeaderImage, 
-      setShowHeaderImage 
-    }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        currentTheme,
+        setTheme,
+        updateTheme,
+        headerImage,
+        setHeaderImage,
+        showHeaderImage,
+        setShowHeaderImage,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   )

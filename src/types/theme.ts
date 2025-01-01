@@ -1,6 +1,31 @@
 export type ThemeType = 'light' | 'dark' | 'sage'
 
+export interface ThemeColors {
+  background: string
+  surface: string
+  surfaceHighlight: string
+  border: string
+  text: string
+  textMuted: string
+  primary: string
+}
+
+export interface ThemeSpacing {
+  gapSmall: string
+  gapMedium: string
+  gapLarge: string
+  paddingSmall: string
+  paddingMedium: string
+  paddingLarge: string
+  borderRadius: string
+}
+
 export interface Theme {
+  colors: ThemeColors
+  spacing: ThemeSpacing
+}
+
+export interface ThemeVariables {
   '--color-background': string
   '--color-surface': string
   '--color-surfaceHighlight': string
@@ -19,51 +44,82 @@ export interface Theme {
 
 export const themes: Record<ThemeType, Theme> = {
   light: {
-    '--color-background': '#ffffff',
-    '--color-surface': '#f8f9fa',
-    '--color-surfaceHighlight': '#f1f3f5',
-    '--color-border': '#dee2e6',
-    '--color-text': '#212529',
-    '--color-textMuted': '#868e96',
-    '--color-primary': '#228be6',
-    '--borderRadius': '8px',
-    '--paddingSmall': '8px',
-    '--paddingMedium': '16px',
-    '--paddingLarge': '24px',
-    '--gapSmall': '8px',
-    '--gapMedium': '16px',
-    '--gapLarge': '24px',
+    colors: {
+      background: '#ffffff',
+      surface: '#f8f9fa',
+      surfaceHighlight: '#f1f3f5',
+      border: '#dee2e6',
+      text: '#212529',
+      textMuted: '#868e96',
+      primary: '#228be6',
+    },
+    spacing: {
+      gapSmall: '8px',
+      gapMedium: '16px',
+      gapLarge: '24px',
+      paddingSmall: '8px',
+      paddingMedium: '16px',
+      paddingLarge: '24px',
+      borderRadius: '8px',
+    }
   },
   dark: {
-    '--color-background': '#0d1117',
-    '--color-surface': '#161b22',
-    '--color-surfaceHighlight': '#21262d',
-    '--color-border': '#30363d',
-    '--color-text': '#c9d1d9',
-    '--color-textMuted': '#8b949e',
-    '--color-primary': '#58a6ff',
-    '--borderRadius': '8px',
-    '--paddingSmall': '8px',
-    '--paddingMedium': '16px',
-    '--paddingLarge': '24px',
-    '--gapSmall': '8px',
-    '--gapMedium': '16px',
-    '--gapLarge': '24px',
+    colors: {
+      background: '#0d1117',
+      surface: '#161b22',
+      surfaceHighlight: '#21262d',
+      border: '#30363d',
+      text: '#c9d1d9',
+      textMuted: '#8b949e',
+      primary: '#58a6ff',
+    },
+    spacing: {
+      gapSmall: '8px',
+      gapMedium: '16px',
+      gapLarge: '24px',
+      paddingSmall: '8px',
+      paddingMedium: '16px',
+      paddingLarge: '24px',
+      borderRadius: '8px',
+    }
   },
   sage: {
-    '--color-background': '#1a1f1c',
-    '--color-surface': '#212725',
-    '--color-surfaceHighlight': '#2a302d',
-    '--color-border': '#2f3734',
-    '--color-text': '#e0e6e3',
-    '--color-textMuted': '#93a099',
-    '--color-primary': '#7fba8a',
-    '--borderRadius': '12px',
-    '--paddingSmall': '8px',
-    '--paddingMedium': '16px',
-    '--paddingLarge': '24px',
-    '--gapSmall': '8px',
-    '--gapMedium': '16px',
-    '--gapLarge': '24px',
+    colors: {
+      background: '#1a1f1c',
+      surface: '#212725',
+      surfaceHighlight: '#2a302d',
+      border: '#2f3734',
+      text: '#e0e6e3',
+      textMuted: '#93a099',
+      primary: '#7fba8a',
+    },
+    spacing: {
+      gapSmall: '8px',
+      gapMedium: '16px',
+      gapLarge: '24px',
+      paddingSmall: '8px',
+      paddingMedium: '16px',
+      paddingLarge: '24px',
+      borderRadius: '12px',
+    }
+  }
+}
+
+export function themeToVariables(theme: Theme): ThemeVariables {
+  return {
+    '--color-background': theme.colors.background,
+    '--color-surface': theme.colors.surface,
+    '--color-surfaceHighlight': theme.colors.surfaceHighlight,
+    '--color-border': theme.colors.border,
+    '--color-text': theme.colors.text,
+    '--color-textMuted': theme.colors.textMuted,
+    '--color-primary': theme.colors.primary,
+    '--borderRadius': theme.spacing.borderRadius,
+    '--paddingSmall': theme.spacing.paddingSmall,
+    '--paddingMedium': theme.spacing.paddingMedium,
+    '--paddingLarge': theme.spacing.paddingLarge,
+    '--gapSmall': theme.spacing.gapSmall,
+    '--gapMedium': theme.spacing.gapMedium,
+    '--gapLarge': theme.spacing.gapLarge,
   }
 } 

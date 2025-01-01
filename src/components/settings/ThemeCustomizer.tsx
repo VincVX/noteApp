@@ -1,31 +1,20 @@
+import React, { useState } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { ColorPicker } from './ColorPicker'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
+import { ThemeType, themes } from '../../types/theme'
 
-// Original dark theme colors
-const originalDarkTheme = {
-  colors: {
-    background: '#0d1117',
-    surface: '#161b22',
-    surfaceHighlight: '#21262d',
-    primary: '#1f6feb',
-    text: '#c9d1d9',
-    textMuted: '#8b949e',
-    border: '#30363d'
-  },
-  spacing: {
-    gapSmall: '8px',
-    gapMedium: '16px',
-    gapLarge: '24px',
-    paddingSmall: '8px',
-    paddingMedium: '16px',
-    paddingLarge: '24px',
-    borderRadius: '6px'
-  }
+interface ThemeCustomizerProps {
+  currentTheme: ThemeType
+  onThemeChange: (theme: ThemeType) => void
 }
 
-export function ThemeCustomizer() {
+export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizerProps) {
   const { theme, updateTheme } = useTheme()
+  const [expandedSections, setExpandedSections] = useState({
+    colors: true,
+    spacing: false,
+  })
 
   const handleColorChange = (key: string, value: string) => {
     updateTheme({
@@ -48,129 +37,188 @@ export function ThemeCustomizer() {
   }
 
   const restoreDefaultTheme = () => {
-    updateTheme(originalDarkTheme)
+    updateTheme(themes[currentTheme])
+  }
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }))
   }
 
   return (
-    <div className="settings-section">
+    <div className="theme-customizer">
       <div className="customizer-header">
-        <h2>Theme Customization</h2>
-        <button className="default-theme-button" onClick={restoreDefaultTheme}>
-          <RotateCcw size={16} />
-          Use Default Theme
-        </button>
-      </div>
-      
-      <div className="setting-group">
-        <h3>Colors</h3>
-        <div className="color-grid">
-          <ColorPicker
-            label="Background"
-            value={theme.colors.background}
-            onChange={(value) => handleColorChange('background', value)}
-          />
-          <ColorPicker
-            label="Surface"
-            value={theme.colors.surface}
-            onChange={(value) => handleColorChange('surface', value)}
-          />
-          <ColorPicker
-            label="Surface Highlight"
-            value={theme.colors.surfaceHighlight}
-            onChange={(value) => handleColorChange('surfaceHighlight', value)}
-          />
-          <ColorPicker
-            label="Primary"
-            value={theme.colors.primary}
-            onChange={(value) => handleColorChange('primary', value)}
-          />
-          <ColorPicker
-            label="Text"
-            value={theme.colors.text}
-            onChange={(value) => handleColorChange('text', value)}
-          />
-          <ColorPicker
-            label="Text Muted"
-            value={theme.colors.textMuted}
-            onChange={(value) => handleColorChange('textMuted', value)}
-          />
-          <ColorPicker
-            label="Border"
-            value={theme.colors.border}
-            onChange={(value) => handleColorChange('border', value)}
-          />
+        <div className="customizer-title">
+          <h3>Theme Customization</h3>
+          <button 
+            className="reset-button" 
+            onClick={restoreDefaultTheme}
+            title="Reset to default theme"
+          >
+            <RotateCcw size={16} />
+            Reset
+          </button>
         </div>
       </div>
 
-      <div className="setting-group">
-        <h3>Spacing</h3>
-        <div className="spacing-grid">
-          <div className="setting-item">
-            <div className="setting-label">
-              <label>Small Gap</label>
-            </div>
-            <input
-              type="text"
-              value={theme.spacing.gapSmall}
-              onChange={(e) => handleSpacingChange('gapSmall', e.target.value)}
-              className="spacing-input"
-            />
+      <div className="customizer-content">
+        {/* Theme Selector */}
+        <div className="setting-item">
+          <div className="setting-label">
+            <label>Theme</label>
+            <div className="setting-description">Choose your preferred theme</div>
           </div>
-          <div className="setting-item">
-            <div className="setting-label">
-              <label>Medium Gap</label>
-            </div>
-            <input
-              type="text"
-              value={theme.spacing.gapMedium}
-              onChange={(e) => handleSpacingChange('gapMedium', e.target.value)}
-              className="spacing-input"
-            />
+          <div className="theme-options">
+            {Object.keys(themes).map((themeKey) => (
+              <button
+                key={themeKey}
+                className={`theme-option ${currentTheme === themeKey ? 'active' : ''}`}
+                onClick={() => onThemeChange(themeKey as ThemeType)}
+              >
+                {themeKey.charAt(0).toUpperCase() + themeKey.slice(1)}
+              </button>
+            ))}
           </div>
-          <div className="setting-item">
-            <div className="setting-label">
-              <label>Large Gap</label>
+        </div>
+
+        {/* Colors Section */}
+        <div className="customizer-section">
+          <button 
+            className="section-header" 
+            onClick={() => toggleSection('colors')}
+          >
+            <h4>Colors</h4>
+            {expandedSections.colors ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          </button>
+          
+          {expandedSections.colors && (
+            <div className="color-grid">
+              <ColorPicker
+                label="Background"
+                value={theme.colors.background}
+                onChange={(value) => handleColorChange('background', value)}
+              />
+              <ColorPicker
+                label="Surface"
+                value={theme.colors.surface}
+                onChange={(value) => handleColorChange('surface', value)}
+              />
+              <ColorPicker
+                label="Surface Highlight"
+                value={theme.colors.surfaceHighlight}
+                onChange={(value) => handleColorChange('surfaceHighlight', value)}
+              />
+              <ColorPicker
+                label="Primary"
+                value={theme.colors.primary}
+                onChange={(value) => handleColorChange('primary', value)}
+              />
+              <ColorPicker
+                label="Text"
+                value={theme.colors.text}
+                onChange={(value) => handleColorChange('text', value)}
+              />
+              <ColorPicker
+                label="Text Muted"
+                value={theme.colors.textMuted}
+                onChange={(value) => handleColorChange('textMuted', value)}
+              />
+              <ColorPicker
+                label="Border"
+                value={theme.colors.border}
+                onChange={(value) => handleColorChange('border', value)}
+              />
             </div>
-            <input
-              type="text"
-              value={theme.spacing.gapLarge}
-              onChange={(e) => handleSpacingChange('gapLarge', e.target.value)}
-              className="spacing-input"
-            />
-          </div>
-          <div className="setting-item">
-            <div className="setting-label">
-              <label>Padding Small</label>
+          )}
+        </div>
+
+        {/* Spacing Section */}
+        <div className="customizer-section">
+          <button 
+            className="section-header" 
+            onClick={() => toggleSection('spacing')}
+          >
+            <h4>Spacing</h4>
+            {expandedSections.spacing ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          </button>
+          
+          {expandedSections.spacing && (
+            <div className="spacing-grid">
+              <div className="setting-item">
+                <div className="setting-label">
+                  <label>Small Gap</label>
+                  <div className="setting-description">Spacing between small elements</div>
+                </div>
+                <div className="spacing-input-wrapper">
+                  <input
+                    type="number"
+                    min="0"
+                    max="32"
+                    value={parseInt(theme.spacing.gapSmall)}
+                    onChange={(e) => handleSpacingChange('gapSmall', `${e.target.value}px`)}
+                    className="number-input"
+                  />
+                  <span className="unit">px</span>
+                </div>
+              </div>
+
+              <div className="setting-item">
+                <div className="setting-label">
+                  <label>Medium Gap</label>
+                  <div className="setting-description">Spacing between medium elements</div>
+                </div>
+                <div className="spacing-input-wrapper">
+                  <input
+                    type="number"
+                    min="0"
+                    max="48"
+                    value={parseInt(theme.spacing.gapMedium)}
+                    onChange={(e) => handleSpacingChange('gapMedium', `${e.target.value}px`)}
+                    className="number-input"
+                  />
+                  <span className="unit">px</span>
+                </div>
+              </div>
+
+              <div className="setting-item">
+                <div className="setting-label">
+                  <label>Large Gap</label>
+                  <div className="setting-description">Spacing between large elements</div>
+                </div>
+                <div className="spacing-input-wrapper">
+                  <input
+                    type="number"
+                    min="0"
+                    max="64"
+                    value={parseInt(theme.spacing.gapLarge)}
+                    onChange={(e) => handleSpacingChange('gapLarge', `${e.target.value}px`)}
+                    className="number-input"
+                  />
+                  <span className="unit">px</span>
+                </div>
+              </div>
+
+              <div className="setting-item">
+                <div className="setting-label">
+                  <label>Border Radius</label>
+                  <div className="setting-description">Roundness of corners</div>
+                </div>
+                <div className="spacing-input-wrapper">
+                  <input
+                    type="number"
+                    min="0"
+                    max="24"
+                    value={parseInt(theme.spacing.borderRadius)}
+                    onChange={(e) => handleSpacingChange('borderRadius', `${e.target.value}px`)}
+                    className="number-input"
+                  />
+                  <span className="unit">px</span>
+                </div>
+              </div>
             </div>
-            <input
-              type="text"
-              value={theme.spacing.paddingSmall}
-              onChange={(e) => handleSpacingChange('paddingSmall', e.target.value)}
-              className="spacing-input"
-            />
-          </div>
-          <div className="setting-item">
-            <div className="setting-label">
-              <label>Padding Medium</label>
-            </div>
-            <input
-              type="text"
-              value={theme.spacing.paddingMedium}
-              onChange={(e) => handleSpacingChange('paddingMedium', e.target.value)}
-              className="spacing-input"
-            />
-          </div>
-          <div className="setting-item">
-            <div className="setting-label">
-              <label>Padding Large</label>
-            </div>
-            <input
-              type="text"
-              value={theme.spacing.paddingLarge}
-              onChange={(e) => handleSpacingChange('paddingLarge', e.target.value)}
-              className="spacing-input"
-            />
-          </div>
+          )}
         </div>
       </div>
     </div>
