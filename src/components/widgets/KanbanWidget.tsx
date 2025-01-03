@@ -1,276 +1,204 @@
-import React, { useState, useMemo } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { IconCopy, IconTrash, IconGripVertical } from '@tabler/icons-react';
+import React, { useState, useCallback } from 'react'
+import { Layout, Plus, X, GripVertical } from 'lucide-react'
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 
 interface KanbanTask {
-  id: string;
-  content: string;
-  tags: string[];
-  completed: boolean;
+  id: string
+  content: string
+  labels: string[]
 }
 
 interface KanbanColumn {
-  id: string;
-  title: string;
-  tasks: KanbanTask[];
+  id: string
+  title: string
+  tasks: KanbanTask[]
 }
 
-export const KanbanWidget: React.FC = () => {
+interface KanbanWidgetProps {
+  onDelete: () => void
+}
+
+export function KanbanWidget({ onDelete }: KanbanWidgetProps) {
   const [columns, setColumns] = useState<KanbanColumn[]>([
-    {
-      id: 'todo',
-      title: 'Todo',
-      tasks: [
-        { id: '1', content: 'Task 1', tags: ['tag'], completed: false }
-      ]
-    }
-  ]);
-  const [newTaskContent, setNewTaskContent] = useState('');
+    { id: 'todo', title: 'To Do', tasks: [] },
+    { id: 'in-progress', title: 'In Progress', tasks: [] },
+    { id: 'done', title: 'Done', tasks: [] }
+  ])
+  const [newTaskContent, setNewTaskContent] = useState('')
 
-  const progress = useMemo(() => {
-    const totalTasks = columns[0].tasks.length;
-    const completedTasks = columns[0].tasks.filter(task => task.completed).length;
-    return totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-  }, [columns]);
+  const handleDragEnd = useCallback((result: any) => {
+    if (!result.destination) return
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
+    const { source, destination } = result
+    const sourceCol = columns.find(col => col.id === source.droppableId)
+    const destCol = columns.find(col => col.id === destination.droppableId)
     
-    const { source, destination } = result;
-    const sourceColumn = columns.find(col => col.id === source.droppableId);
-    const destColumn = columns.find(col => col.id === destination.droppableId);
-    
-    if (!sourceColumn || !destColumn) return;
+    if (!sourceCol || !destCol) return
 
-    const sourceTasks = [...sourceColumn.tasks];
+    const sourceTasks = [...sourceCol.tasks]
     const destTasks = source.droppableId === destination.droppableId 
       ? sourceTasks 
-      : [...destColumn.tasks];
+      : [...destCol.tasks]
 
-    const [removed] = sourceTasks.splice(source.index, 1);
-    destTasks.splice(destination.index, 0, removed);
-
-    const newColumns = columns.map(col => {
-      if (col.id === source.droppableId) {
-        return { ...col, tasks: sourceTasks };
-      }
-      if (col.id === destination.droppableId) {
-        return { ...col, tasks: destTasks };
-      }
-      return col;
-    });
-
-    setColumns(newColumns);
-  };
-
-  const toggleTaskCompletion = (taskId: string) => {
-    setColumns(columns.map(col => ({
-      ...col,
-      tasks: col.tasks.map(task => 
-        task.id === taskId 
-          ? { ...task, completed: !task.completed }
-          : task
-      )
-    })));
-  };
-
-  const addNewTask = () => {
-    if (!newTaskContent.trim()) return;
-    
-    const newTask: KanbanTask = {
-      id: Date.now().toString(),
-      content: newTaskContent,
-      tags: [],
-      completed: false
-    };
+    const [removed] = sourceTasks.splice(source.index, 1)
+    destTasks.splice(destination.index, 0, removed)
 
     setColumns(columns.map(col => {
-      if (col.id === 'todo') {
-        return { ...col, tasks: [...col.tasks, newTask] };
+      if (col.id === source.droppableId) {
+        return { ...col, tasks: sourceTasks }
       }
-      return col;
-    }));
+      if (col.id === destination.droppableId) {
+        return { ...col, tasks: destTasks }
+      }
+      return col
+    }))
+  }, [columns])
 
-    setNewTaskContent('');
-  };
+  const addTask = useCallback(() => {
+    console.log('Adding task:', newTaskContent)
+    if (!newTaskContent.trim()) {
+      console.log('Empty task, returning')
+      return
+    }
 
-  const deleteTask = (columnId: string, taskId: string) => {
+    const newTask: KanbanTask = {
+      id: Date.now().toString(),
+      content: newTaskContent.trim(),
+      labels: []
+    }
+    console.log('New task:', newTask)
+
+    setColumns(prevColumns => {
+      const updatedColumns = prevColumns.map(col => {
+        if (col.id === 'todo') {
+          console.log('Adding to todo column:', [...col.tasks, newTask])
+          return { ...col, tasks: [...col.tasks, newTask] }
+        }
+        return col
+      })
+      console.log('Updated columns:', updatedColumns)
+      return updatedColumns
+    })
+
+    setNewTaskContent('')
+  }, [newTaskContent])
+
+  const deleteTask = useCallback((columnId: string, taskId: string) => {
     setColumns(columns.map(col => {
       if (col.id === columnId) {
         return {
           ...col,
           tasks: col.tasks.filter(task => task.id !== taskId)
-        };
+        }
       }
-      return col;
-    }));
-  };
-
-  const duplicateTask = (columnId: string, task: KanbanTask) => {
-    const newTask = {
-      ...task,
-      id: Date.now().toString()
-    };
-
-    setColumns(columns.map(col => {
-      if (col.id === columnId) {
-        return {
-          ...col,
-          tasks: [...col.tasks, newTask]
-        };
-      }
-      return col;
-    }));
-  };
+      return col
+    }))
+  }, [columns])
 
   return (
-    <div className="kanban-widget" style={{ 
-      backgroundColor: '#1a1a1a', 
-      borderRadius: '8px',
-      padding: '16px',
-      color: 'white'
-    }}>
-      <DragDropContext onDragEnd={handleDragEnd}>
-        {columns.map(column => (
-          <div key={column.id}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              marginBottom: '8px'
-            }}>
-              <h3>{column.title}</h3>
-              <span style={{ color: '#666' }}>2:10</span>
-            </div>
+    <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl overflow-hidden h-full flex flex-col transition-all duration-200 hover:border-white/10 hover:bg-white/[0.03]">
+      <div className="card-header h-[52px] px-5 border-b border-white/[0.05] flex justify-between items-center bg-transparent">
+        <div className="text-sm font-medium text-white/90 flex items-center gap-2">
+          <Layout size={16} />
+          Kanban Board
+        </div>
+      </div>
+      
+      <div className="p-5 flex-1 overflow-hidden flex flex-col">
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={newTaskContent}
+            onChange={(e) => setNewTaskContent(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addTask()}
+            placeholder="Add a new task..."
+            className="flex-1 bg-white/[0.02] border border-white/[0.05] rounded-lg px-4 py-2 text-sm text-white/90 placeholder-white/40 focus:outline-none focus:border-white/10 focus:bg-white/[0.03] transition-all duration-200"
+          />
+          <button
+            onClick={addTask}
+            className="bg-white/[0.05] text-white/80 border-none px-4 py-2 rounded-lg cursor-pointer text-sm transition-all duration-150 hover:bg-white/10 flex items-center gap-2"
+          >
+            <Plus size={16} /> Add
+          </button>
+        </div>
 
-            <div style={{
-              width: '100%',
-              height: '2px',
-              backgroundColor: '#333',
-              marginBottom: '16px',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                height: '100%',
-                backgroundColor: '#4CAF50',
-                width: `${progress}%`,
-                transition: 'width 0.3s ease'
-              }} />
-            </div>
-            
-            <Droppable droppableId={column.id}>
-              {(provided) => (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  style={{ minHeight: '100px' }}
-                >
-                  {column.tasks.map((task, index) => (
-                    <Draggable key={task.id} draggableId={task.id} index={index}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          style={{
-                            backgroundColor: '#2a2a2a',
-                            borderRadius: '6px',
-                            padding: '12px',
-                            marginBottom: '8px',
-                            cursor: 'pointer',
-                            ...provided.draggableProps.style
-                          }}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-                              <div {...provided.dragHandleProps}>
-                                <IconGripVertical size={16} />
-                              </div>
-                              <input
-                                type="checkbox"
-                                checked={task.completed}
-                                onChange={() => toggleTaskCompletion(task.id)}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="flex gap-4 h-full overflow-x-auto pb-4">
+            {columns.map(column => (
+              <div
+                key={column.id}
+                className="flex-1 min-w-[280px] flex flex-col bg-white/[0.02] rounded-lg border border-white/[0.05]"
+              >
+                <h3 className="text-white/90 font-medium p-4 pb-2 text-sm">{column.title}</h3>
+                
+                <Droppable droppableId={column.id}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={`flex-1 p-2 transition-colors duration-200 ${
+                        snapshot.isDraggingOver ? 'bg-white/[0.03]' : ''
+                      }`}
+                    >
+                      <div className="space-y-2 min-h-full">
+                        {column.tasks.map((task, index) => (
+                          <Draggable key={task.id} draggableId={task.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
                                 style={{
-                                  margin: 0,
-                                  cursor: 'pointer'
+                                  ...provided.draggableProps.style,
+                                  transform: snapshot.isDragging ? provided.draggableProps.style?.transform : 'translate(0, 0)'
                                 }}
-                              />
-                              <span style={{
-                                textDecoration: task.completed ? 'line-through' : 'none',
-                                color: task.completed ? '#666' : 'white'
-                              }}>
-                                {task.content}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                              <button
-                                onClick={() => duplicateTask(column.id, task)}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}
+                                className={`bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 group relative ${
+                                  snapshot.isDragging ? 'shadow-lg ring-1 ring-white/10' : ''
+                                }`}
                               >
-                                <IconCopy size={16} />
-                              </button>
-                              <button
-                                onClick={() => deleteTask(column.id, task.id)}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}
-                              >
-                                <IconTrash size={16} />
-                              </button>
-                            </div>
-                          </div>
-                          {task.tags.length > 0 && (
-                            <div style={{ marginTop: '8px' }}>
-                              {task.tags.map((tag, i) => (
-                                <span
-                                  key={i}
-                                  style={{
-                                    backgroundColor: '#333',
-                                    padding: '2px 8px',
-                                    borderRadius: '4px',
-                                    fontSize: '12px',
-                                    marginRight: '4px'
-                                  }}
+                                <div 
+                                  {...provided.dragHandleProps}
+                                  className="absolute left-2 top-1/2 -translate-y-1/2 text-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-grab active:cursor-grabbing"
                                 >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-
-            <div style={{ marginTop: '16px' }}>
-              <input
-                type="text"
-                value={newTaskContent}
-                onChange={(e) => setNewTaskContent(e.target.value)}
-                placeholder="New Task"
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  backgroundColor: '#2a2a2a',
-                  border: 'none',
-                  borderRadius: '6px',
-                  color: 'white'
-                }}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    addNewTask();
-                  }
-                }}
-              />
-            </div>
+                                  <GripVertical size={14} />
+                                </div>
+                                <div className="pl-5">
+                                  <p className="text-white/90 text-sm break-words">{task.content}</p>
+                                  {task.labels.length > 0 && (
+                                    <div className="flex gap-1.5 mt-2">
+                                      {task.labels.map((label, i) => (
+                                        <span
+                                          key={i}
+                                          className="bg-white/[0.05] px-2 py-0.5 rounded text-xs text-white/60"
+                                        >
+                                          {label}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    deleteTask(column.id, task.id)
+                                  }}
+                                  className="absolute top-2 right-2 text-white/40 opacity-0 group-hover:opacity-100 hover:text-white/90 transition-all duration-200"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    </div>
+                  )}
+                </Droppable>
+              </div>
+            ))}
           </div>
-        ))}
-      </DragDropContext>
+        </DragDropContext>
+      </div>
     </div>
-  );
-}; 
+  )
+} 

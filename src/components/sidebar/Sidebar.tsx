@@ -1,4 +1,4 @@
-import { Type, CheckSquare, Book, Settings, Lock, Music, Image, Grid } from 'lucide-react'
+import { Type, CheckSquare, Book, Settings, Lock, Music, Image, Grid, Layout } from 'lucide-react'
 import { Widget } from '../../types'
 
 interface SidebarProps {
@@ -42,6 +42,9 @@ export function Sidebar({
             </button>
             <button className="add-widget-button" onClick={() => onAddWidget('photo')}>
               <Image size={16} /> Add Photo
+            </button>
+            <button className="add-widget-button" onClick={() => onAddWidget('kanban')}>
+              <Layout size={16} /> Add Kanban Board
             </button>
           </div>
         </div>

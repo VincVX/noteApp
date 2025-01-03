@@ -1379,3 +1379,22 @@ body {
   border: none;
 }
 
+/* Disable text selection globally */
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Enable text selection in inputs and editable content */
+input,
+textarea,
+[contenteditable="true"],
+[contenteditable="true"] * {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+

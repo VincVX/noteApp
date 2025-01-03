@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Type, CheckSquare, Book, Music, Image, Search } from 'lucide-react'
+import { Type, CheckSquare, Book, Music, Image, Search, Layout } from 'lucide-react'
 import { Widget } from '../../types'
 
 interface CommandPaletteProps {
@@ -24,6 +24,7 @@ export function CommandPalette({ isOpen, onClose, onAddWidget }: CommandPaletteP
     { type: 'book', label: 'Book', icon: <Book size={16} /> },
     { type: 'spotify', label: 'Spotify', icon: <Music size={16} /> },
     { type: 'photo', label: 'Photo', icon: <Image size={16} /> },
+    { type: 'kanban', label: 'Kanban Board', icon: <Layout size={16} /> },
   ]
 
   const suggestions = search.trim()

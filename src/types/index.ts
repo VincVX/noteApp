@@ -1,6 +1,6 @@
 export type Widget = {
   id: string
-  widget_type: 'markdown' | 'todo' | 'book' | 'spotify' | 'photo'
+  widget_type: 'markdown' | 'todo' | 'book' | 'spotify' | 'photo' | 'kanban'
   content: string
   position: {
     x: number

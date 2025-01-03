@@ -6,7 +6,7 @@ import 'highlight.js/styles/github-dark.css'
 import './App.css'
 
 import { Widget, Layout, MarkdownNote } from './types'
-import { MarkdownWidget, TodoWidget, BookWidget, SpotifyWidget, PhotoWidget } from './components/widgets'
+import { MarkdownWidget, TodoWidget, BookWidget, SpotifyWidget, PhotoWidget, KanbanWidget } from './components/widgets'
 import { Sidebar } from './components/sidebar/Sidebar'
 import { SettingsPage } from './components/settings/SettingsPage'
 import { ThemeProvider, useTheme } from './contexts/ThemeContext'
@@ -227,6 +227,12 @@ function AppContent() {
                 )}
                 {widget.widget_type === 'photo' && (
                   <PhotoWidget
+                    key={widget.id}
+                    onDelete={() => deleteWidget(widget.id)}
+                  />
+                )}
+                {widget.widget_type === 'kanban' && (
+                  <KanbanWidget
                     key={widget.id}
                     onDelete={() => deleteWidget(widget.id)}
                   />
