@@ -1,12 +1,46 @@
 import { useState } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { ColorPicker } from './ColorPicker'
-import { RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
+import { 
+  RotateCcw, 
+  ChevronDown, 
+  ChevronUp, 
+  Sun, 
+  Moon, 
+  Leaf, 
+  Music,
+  Zap,
+  Waves,
+  Sunset,
+  Trees
+} from 'lucide-react'
 import { ThemeType, themes } from '../../types/theme'
 
 interface ThemeCustomizerProps {
   readonly currentTheme: ThemeType
   readonly onThemeChange: (theme: ThemeType) => void
+}
+
+const themeIcons = {
+  light: <Sun size={16} />,
+  dark: <Moon size={16} />,
+  sage: <Leaf size={16} />,
+  lofi: <Music size={16} />,
+  cyberpunk: <Zap size={16} />,
+  ocean: <Waves size={16} />,
+  sunset: <Sunset size={16} />,
+  forest: <Trees size={16} />
+}
+
+const themeDescriptions = {
+  light: 'Clean and bright interface',
+  dark: 'Easy on the eyes',
+  sage: 'Nature-inspired calm',
+  lofi: 'Warm and cozy vibes',
+  cyberpunk: 'Neon-futuristic style',
+  ocean: 'Deep sea tranquility',
+  sunset: 'Warm evening colors',
+  forest: 'Natural earth tones'
 }
 
 export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizerProps) {
@@ -48,63 +82,64 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
   }
 
   return (
-    <div className="theme-customizer">
-      <div className="customizer-header">
-        <div className="customizer-title">
-          <h3>Theme Customization</h3>
-          <button 
-            className="reset-button" 
-            onClick={restoreDefaultTheme}
-            title="Reset to default theme"
-          >
-            <RotateCcw size={16} />
-            Reset
-          </button>
-        </div>
+    <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl overflow-hidden">
+      <div className="p-5 border-b border-white/[0.05] flex justify-between items-center">
+        <h3 className="text-white/90 text-lg font-medium">Theme Customization</h3>
+        <button 
+          className="bg-white/[0.05] text-white/80 border-none px-3 py-2 rounded-lg cursor-pointer text-sm transition-all duration-150 hover:bg-white/10 flex items-center gap-1.5"
+          onClick={restoreDefaultTheme}
+          title="Reset to default theme"
+        >
+          <RotateCcw size={16} />
+          Reset
+        </button>
       </div>
 
-      <div className="customizer-content">
+      <div className="p-5">
         {/* Theme Selector */}
-        <div className="setting-item">
-          <div className="setting-label">
-            <label htmlFor="theme-selector">Theme</label>
-            <div className="setting-description">Choose your preferred theme</div>
+        <div className="mb-8">
+          <div className="mb-4">
+            <label className="text-white/90 text-sm font-medium">Theme</label>
+            <div className="text-white/60 text-sm mt-1">Choose your preferred theme</div>
           </div>
-          <div className="theme-options" id="theme-selector" role="radiogroup" aria-label="Theme Selection">
+          <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Theme Selection">
             {Object.keys(themes).map((themeKey) => (
               <button
                 key={themeKey}
-                className={`theme-option ${currentTheme === themeKey ? 'active' : ''}`}
+                className={`flex items-center gap-3 p-4 rounded-xl border transition-all duration-200 ${
+                  currentTheme === themeKey 
+                    ? 'bg-white/[0.05] border-white/20 text-white/90' 
+                    : 'bg-white/[0.02] border-white/[0.05] text-white/80 hover:bg-white/[0.03] hover:border-white/10'
+                }`}
                 onClick={() => onThemeChange(themeKey as ThemeType)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onThemeChange(themeKey as ThemeType);
-                  }
-                }}
                 role="radio"
                 aria-checked={currentTheme === themeKey}
-                tabIndex={0}
               >
-                {themeKey.charAt(0).toUpperCase() + themeKey.slice(1)}
+                <div className={`p-2 rounded-lg bg-white/[0.05] ${currentTheme === themeKey ? 'text-white/90' : 'text-white/60'}`}>
+                  {themeIcons[themeKey as ThemeType]}
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium">{themeKey.charAt(0).toUpperCase() + themeKey.slice(1)}</span>
+                  <span className="text-xs text-white/40">{themeDescriptions[themeKey as ThemeType]}</span>
+                </div>
               </button>
             ))}
           </div>
         </div>
 
         {/* Colors Section */}
-        <div className="customizer-section">
+        <div className="mb-6">
           <button 
-            className="section-header" 
+            className="w-full flex justify-between items-center py-2 text-white/90 hover:text-white transition-colors duration-200"
             onClick={() => toggleSection('colors')}
             aria-expanded={expandedSections.colors}
           >
-            <h4>Colors</h4>
+            <h4 className="text-base font-medium">Colors</h4>
             {expandedSections.colors ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
           
           {expandedSections.colors && (
-            <div className="color-grid">
+            <div className="mt-4 grid gap-4 p-4 bg-white/[0.02] rounded-xl border border-white/[0.05]">
               <ColorPicker
                 label="Background"
                 value={theme.colors.background}
@@ -145,91 +180,85 @@ export function ThemeCustomizer({ currentTheme, onThemeChange }: ThemeCustomizer
         </div>
 
         {/* Spacing Section */}
-        <div className="customizer-section">
+        <div>
           <button 
-            className="section-header" 
+            className="w-full flex justify-between items-center py-2 text-white/90 hover:text-white transition-colors duration-200"
             onClick={() => toggleSection('spacing')}
             aria-expanded={expandedSections.spacing}
           >
-            <h4>Spacing</h4>
+            <h4 className="text-base font-medium">Spacing</h4>
             {expandedSections.spacing ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
           
           {expandedSections.spacing && (
-            <div className="spacing-grid">
-              <div className="setting-item">
-                <div className="setting-label">
-                  <label htmlFor="gap-small">Small Gap</label>
-                  <div className="setting-description">Spacing between small elements</div>
+            <div className="mt-4 grid gap-4 p-4 bg-white/[0.02] rounded-xl border border-white/[0.05]">
+              <div className="grid gap-4">
+                <div>
+                  <label htmlFor="gap-small" className="text-white/90 text-sm">Small Gap</label>
+                  <div className="text-white/60 text-xs mt-1">Spacing between small elements</div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <input
+                      id="gap-small"
+                      type="number"
+                      min="0"
+                      max="32"
+                      value={parseInt(theme.spacing.gapSmall.replace('px', ''))}
+                      onChange={(e) => handleSpacingChange('gapSmall', `${e.target.value}px`)}
+                      className="w-20 bg-white/[0.02] border border-white/[0.05] rounded-lg px-3 py-2 text-sm text-white/90"
+                    />
+                    <span className="text-white/40 text-sm">px</span>
+                  </div>
                 </div>
-                <div className="spacing-input-wrapper">
-                  <input
-                    id="gap-small"
-                    type="number"
-                    min="0"
-                    max="32"
-                    value={parseInt(theme.spacing.gapSmall.replace('px', ''))}
-                    onChange={(e) => handleSpacingChange('gapSmall', `${e.target.value}px`)}
-                    className="number-input"
-                  />
-                  <span className="unit">px</span>
-                </div>
-              </div>
 
-              <div className="setting-item">
-                <div className="setting-label">
-                  <label htmlFor="gap-medium">Medium Gap</label>
-                  <div className="setting-description">Spacing between medium elements</div>
+                <div>
+                  <label htmlFor="gap-medium" className="text-white/90 text-sm">Medium Gap</label>
+                  <div className="text-white/60 text-xs mt-1">Spacing between medium elements</div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <input
+                      id="gap-medium"
+                      type="number"
+                      min="0"
+                      max="48"
+                      value={parseInt(theme.spacing.gapMedium.replace('px', ''))}
+                      onChange={(e) => handleSpacingChange('gapMedium', `${e.target.value}px`)}
+                      className="w-20 bg-white/[0.02] border border-white/[0.05] rounded-lg px-3 py-2 text-sm text-white/90"
+                    />
+                    <span className="text-white/40 text-sm">px</span>
+                  </div>
                 </div>
-                <div className="spacing-input-wrapper">
-                  <input
-                    id="gap-medium"
-                    type="number"
-                    min="0"
-                    max="48"
-                    value={parseInt(theme.spacing.gapMedium.replace('px', ''))}
-                    onChange={(e) => handleSpacingChange('gapMedium', `${e.target.value}px`)}
-                    className="number-input"
-                  />
-                  <span className="unit">px</span>
-                </div>
-              </div>
 
-              <div className="setting-item">
-                <div className="setting-label">
-                  <label htmlFor="gap-large">Large Gap</label>
-                  <div className="setting-description">Spacing between large elements</div>
+                <div>
+                  <label htmlFor="gap-large" className="text-white/90 text-sm">Large Gap</label>
+                  <div className="text-white/60 text-xs mt-1">Spacing between large elements</div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <input
+                      id="gap-large"
+                      type="number"
+                      min="0"
+                      max="64"
+                      value={parseInt(theme.spacing.gapLarge.replace('px', ''))}
+                      onChange={(e) => handleSpacingChange('gapLarge', `${e.target.value}px`)}
+                      className="w-20 bg-white/[0.02] border border-white/[0.05] rounded-lg px-3 py-2 text-sm text-white/90"
+                    />
+                    <span className="text-white/40 text-sm">px</span>
+                  </div>
                 </div>
-                <div className="spacing-input-wrapper">
-                  <input
-                    id="gap-large"
-                    type="number"
-                    min="0"
-                    max="64"
-                    value={parseInt(theme.spacing.gapLarge.replace('px', ''))}
-                    onChange={(e) => handleSpacingChange('gapLarge', `${e.target.value}px`)}
-                    className="number-input"
-                  />
-                  <span className="unit">px</span>
-                </div>
-              </div>
 
-              <div className="setting-item">
-                <div className="setting-label">
-                  <label htmlFor="border-radius">Border Radius</label>
-                  <div className="setting-description">Roundness of corners</div>
-                </div>
-                <div className="spacing-input-wrapper">
-                  <input
-                    id="border-radius"
-                    type="number"
-                    min="0"
-                    max="24"
-                    value={parseInt(theme.spacing.borderRadius.replace('px', ''))}
-                    onChange={(e) => handleSpacingChange('borderRadius', `${e.target.value}px`)}
-                    className="number-input"
-                  />
-                  <span className="unit">px</span>
+                <div>
+                  <label htmlFor="border-radius" className="text-white/90 text-sm">Border Radius</label>
+                  <div className="text-white/60 text-xs mt-1">Roundness of corners</div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <input
+                      id="border-radius"
+                      type="number"
+                      min="0"
+                      max="24"
+                      value={parseInt(theme.spacing.borderRadius.replace('px', ''))}
+                      onChange={(e) => handleSpacingChange('borderRadius', `${e.target.value}px`)}
+                      className="w-20 bg-white/[0.02] border border-white/[0.05] rounded-lg px-3 py-2 text-sm text-white/90"
+                    />
+                    <span className="text-white/40 text-sm">px</span>
+                  </div>
                 </div>
               </div>
             </div>

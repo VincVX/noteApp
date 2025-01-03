@@ -1,4 +1,4 @@
-export type ThemeType = 'light' | 'dark' | 'sage'
+export type ThemeType = 'light' | 'dark' | 'sage' | 'lofi' | 'cyberpunk' | 'ocean' | 'sunset' | 'forest'
 
 export interface ThemeColors {
   background: string
@@ -101,6 +101,106 @@ export const themes: Record<ThemeType, Theme> = {
       paddingMedium: '16px',
       paddingLarge: '24px',
       borderRadius: '12px',
+    }
+  },
+  lofi: {
+    colors: {
+      background: '#2a2522',
+      surface: '#332e2b',
+      surfaceHighlight: '#3b3633',
+      border: '#443f3c',
+      text: '#e6e0dd',
+      textMuted: '#a39c98',
+      primary: '#d4bfaa',
+    },
+    spacing: {
+      gapSmall: '8px',
+      gapMedium: '16px',
+      gapLarge: '24px',
+      paddingSmall: '8px',
+      paddingMedium: '16px',
+      paddingLarge: '24px',
+      borderRadius: '16px',
+    }
+  },
+  cyberpunk: {
+    colors: {
+      background: '#0D0D1F',
+      surface: '#1A1A3A',
+      surfaceHighlight: '#2A2A4A',
+      border: '#3D3D6D',
+      text: '#E6E6FF',
+      textMuted: '#9999CC',
+      primary: '#FF2E88',
+    },
+    spacing: {
+      gapSmall: '8px',
+      gapMedium: '16px',
+      gapLarge: '24px',
+      paddingSmall: '8px',
+      paddingMedium: '16px',
+      paddingLarge: '24px',
+      borderRadius: '4px',
+    }
+  },
+  ocean: {
+    colors: {
+      background: '#0A192F',
+      surface: '#112240',
+      surfaceHighlight: '#1A365D',
+      border: '#234876',
+      text: '#E2F1FF',
+      textMuted: '#8BA7CC',
+      primary: '#64FFDA',
+    },
+    spacing: {
+      gapSmall: '8px',
+      gapMedium: '16px',
+      gapLarge: '24px',
+      paddingSmall: '8px',
+      paddingMedium: '16px',
+      paddingLarge: '24px',
+      borderRadius: '10px',
+    }
+  },
+  sunset: {
+    colors: {
+      background: '#2D1B2D',
+      surface: '#3D2438',
+      surfaceHighlight: '#4D2D44',
+      border: '#5E3650',
+      text: '#FFE4D6',
+      textMuted: '#D6B4A8',
+      primary: '#FF9E7D',
+    },
+    spacing: {
+      gapSmall: '8px',
+      gapMedium: '16px',
+      gapLarge: '24px',
+      paddingSmall: '8px',
+      paddingMedium: '16px',
+      paddingLarge: '24px',
+      borderRadius: '12px',
+    }
+  },
+  forest: {
+    colors: {
+      background: '#1B2921',
+      surface: '#243329',
+      surfaceHighlight: '#2D3D32',
+      border: '#36473B',
+      text: '#E0EBE3',
+      textMuted: '#A8B8AD',
+      primary: '#7FB069',
+    },
+    spacing: {
+      gapSmall: '8px',
+      gapMedium: '16px',
+      gapLarge: '24px',
+      paddingSmall: '8px',
+      paddingMedium: '16px',
+      paddingLarge: '24px',
+      borderRadius: '8px',
     }
   }
 }
