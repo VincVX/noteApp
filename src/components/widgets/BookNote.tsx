@@ -142,6 +142,7 @@ export function BookNote({ note, onUpdate, existingTags, isOverlay = false }: Bo
       {renderContent()}
       {isCommandOpen && (
         <CommandPalette
+          mode="tag"
           isOpen={isCommandOpen}
           onClose={() => setIsCommandOpen(false)}
           onSelect={addTag}

@@ -259,6 +259,7 @@ function AppContent() {
       )}
 
       <CommandPalette
+        mode="widget"
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
         onAddWidget={addWidget}
