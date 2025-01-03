@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
-import { Theme, ThemeType, themes, themeToVariables } from '../types/theme'
+import React, { createContext, useContext, useEffect } from 'react'
+import { useCanvas } from './CanvasContext'
+import { themes, Theme, ThemeType } from '../types/theme'
 
 interface ThemeContextType {
-  theme: Theme
   currentTheme: ThemeType
   setTheme: (theme: ThemeType) => void
+  theme: Theme
   updateTheme: (theme: Theme) => void
   headerImage: string | null
   setHeaderImage: (image: string | null) => void
@@ -15,37 +16,56 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [currentTheme, setCurrentTheme] = useState<ThemeType>('dark')
-  const [theme, setThemeState] = useState<Theme>(themes[currentTheme])
-  const [headerImage, setHeaderImage] = useState<string | null>(null)
-  const [showHeaderImage, setShowHeaderImage] = useState(false)
+  const { canvasData, setTheme: setCanvasTheme, updateSettings } = useCanvas()
+  const { theme: currentTheme, settings } = canvasData
+
+  // Ensure we have a valid theme
+  const validTheme = (currentTheme as ThemeType) || 'dark'
 
   const setTheme = (newTheme: ThemeType) => {
-    setCurrentTheme(newTheme)
-    setThemeState(themes[newTheme])
+    setCanvasTheme(newTheme)
   }
 
   const updateTheme = (newTheme: Theme) => {
-    setThemeState(newTheme)
+    // This function remains for theme customization, but changes won't persist
+    // Consider adding theme customization to canvas settings if needed
   }
 
+  const setHeaderImage = (image: string | null) => {
+    updateSettings({ header_image: image })
+  }
+
+  const setShowHeaderImage = (show: boolean) => {
+    updateSettings({ show_header_image: show })
+  }
+
+  // Apply theme CSS variables
   useEffect(() => {
-    const variables = themeToVariables(theme)
-    Object.entries(variables).forEach(([key, value]) => {
-      document.documentElement.style.setProperty(key, value)
-    })
-  }, [theme])
+    try {
+      const themeVariables = themes[validTheme]
+      if (themeVariables) {
+        Object.entries(themeVariables.colors).forEach(([key, value]) => {
+          document.documentElement.style.setProperty(`--color-${key}`, value)
+        })
+        Object.entries(themeVariables.spacing).forEach(([key, value]) => {
+          document.documentElement.style.setProperty(`--${key}`, value)
+        })
+      }
+    } catch (error) {
+      console.error('Error applying theme:', error)
+    }
+  }, [validTheme])
 
   return (
     <ThemeContext.Provider
       value={{
-        theme,
-        currentTheme,
+        currentTheme: validTheme,
         setTheme,
+        theme: themes[validTheme],
         updateTheme,
-        headerImage,
+        headerImage: settings.header_image || null,
         setHeaderImage,
-        showHeaderImage,
+        showHeaderImage: settings.show_header_image || false,
         setShowHeaderImage,
       }}
     >
@@ -54,7 +74,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function useTheme() {
+export const useTheme = () => {
   const context = useContext(ThemeContext)
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider')

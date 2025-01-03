@@ -17,6 +17,7 @@ body {
 .react-grid-item {
   transition: all 200ms ease;
   transition-property: left, top, width, height;
+  position: relative;
 }
 
 .react-grid-item.react-grid-placeholder {
@@ -1057,5 +1058,82 @@ body {
 .layout {
   min-width: 1200px !important;
   margin: 0 auto;
+}
+
+.widget-header {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 8px;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.delete-widget {
+  background: var(--color-surfaceHighlight);
+  border: 1px solid var(--color-border);
+  color: var(--color-textMuted);
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-widget:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-textMuted);
+}
+
+/* Ensure widgets take full height of grid item */
+.react-grid-item > div {
+  height: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--borderRadius);
+  overflow: hidden;
+}
+
+.setting-slider {
+  width: 150px;
+  height: 4px;
+  -webkit-appearance: none;
+  background: var(--color-border);
+  border-radius: 2px;
+  outline: none;
+  margin-right: 12px;
+}
+
+.setting-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: none;
+}
+
+.setting-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: none;
+}
+
+.setting-value {
+  color: var(--color-text);
+  font-size: 14px;
+  min-width: 45px;
+  text-align: right;
 }
 
