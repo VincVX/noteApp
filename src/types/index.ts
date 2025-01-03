@@ -1,6 +1,25 @@
 export type Widget = {
   id: string
-  type: 'markdown' | 'todo' | 'book' | 'spotify' | 'photo'
+  widget_type: 'markdown' | 'todo' | 'book' | 'spotify' | 'photo'
+  content: string
+  position: {
+    x: number
+    y: number
+  }
+  size: {
+    width: number
+    height: number
+  }
+  style: {
+    background_color?: string
+    border_color?: string
+    text_color?: string
+    font_size?: number
+    font_family?: string
+    rotation?: number
+    opacity?: number
+  }
+  created?: string
 }
 
 export interface TodoItem {
@@ -17,9 +36,8 @@ export interface Layout {
   h: number
   minW?: number
   minH?: number
-  maxY?: number
-  isResizable?: boolean
-  isDraggable?: boolean
+  maxW?: number
+  maxH?: number
   static?: boolean
 }
 
