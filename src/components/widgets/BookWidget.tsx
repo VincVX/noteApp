@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { Book, Plus } from 'lucide-react'
+import { Book, Plus, X } from 'lucide-react'
 import { Note } from '../../types'
 import { BookNote } from './BookNote'
 
@@ -10,6 +10,7 @@ interface BookWidgetProps {
 export function BookWidget({ onDelete }: BookWidgetProps) {
   const [notes, setNotes] = useState<Note[]>([])
   const [allTags, setAllTags] = useState<string[]>([])
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null)
 
   const addNote = useCallback(() => {
     const newNote: Note = {
@@ -29,7 +30,19 @@ export function BookWidget({ onDelete }: BookWidgetProps) {
     const newTags = new Set(allTags)
     updatedNote.tags.forEach(tag => newTags.add(tag))
     setAllTags(Array.from(newTags))
-  }, [notes, allTags])
+    
+    // Also update the selected note if it's being edited in overlay
+    if (selectedNote?.id === updatedNote.id) {
+      setSelectedNote(updatedNote)
+    }
+  }, [notes, allTags, selectedNote])
+
+  const deleteNote = useCallback((noteId: string) => {
+    setNotes(notes.filter(note => note.id !== noteId))
+    if (selectedNote?.id === noteId) {
+      setSelectedNote(null)
+    }
+  }, [notes, selectedNote])
 
   // Handle mouse down for drag behavior
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -49,39 +62,76 @@ export function BookWidget({ onDelete }: BookWidgetProps) {
   }, [])
 
   return (
-    <div className="card" onMouseDown={handleMouseDown}>
-      <div className="card-header">
-        <div className="card-title" aria-label="Book notes">
-          <Book size={18} />
-          Book
+    <>
+      <div className="card" onMouseDown={handleMouseDown}>
+        <div className="card-header">
+          <div className="card-title" aria-label="Book notes">
+            <Book size={18} />
+            Book
+          </div>
+          <button 
+            className="preview-button"
+            onClick={addNote}
+          >
+            <Plus size={16} /> New Note
+          </button>
         </div>
-        <button 
-          className="preview-button"
-          onClick={addNote}
-        >
-          <Plus size={16} /> New Note
-        </button>
+        <div className="card-content">
+          <div className="book-notes">
+            {notes.map(note => (
+              <div key={note.id} className="book-note-preview" onClick={() => setSelectedNote(note)}>
+                <h3>{note.title || 'Untitled Note'}</h3>
+                <p className="note-preview">
+                  {note.content.slice(0, 100)}{note.content.length > 100 ? '...' : ''}
+                </p>
+                <div className="note-preview-meta">
+                  <span>{new Date(note.created).toLocaleDateString()}</span>
+                  {note.tags.length > 0 && (
+                    <div className="note-preview-tags">
+                      {note.tags.map(tag => (
+                        <span key={tag} className="note-tag-preview">{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button 
+                  className="delete-note" 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    deleteNote(note.id)
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+            {notes.length === 0 && (
+              <div className="empty-notes">
+                <p>No notes yet</p>
+                <button className="add-note-button" onClick={addNote}>
+                  <Plus size={16} /> Create your first note
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      <div className="card-content">
-        <div className="book-notes">
-          {notes.map(note => (
+
+      {selectedNote && (
+        <div className="overlay">
+          <div className="overlay-content">
+            <button className="close-overlay" onClick={() => setSelectedNote(null)}>
+              <X size={20} />
+            </button>
             <BookNote
-              key={note.id}
-              note={note}
+              note={selectedNote}
               onUpdate={updateNote}
               existingTags={allTags}
+              isOverlay={true}
             />
-          ))}
-          {notes.length === 0 && (
-            <div className="empty-notes">
-              <p>No notes yet</p>
-              <button className="add-note-button" onClick={addNote}>
-                <Plus size={16} /> Create your first note
-              </button>
-            </div>
-          )}
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   )
 } 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Calendar, Hash, Plus } from 'lucide-react'
+import { Calendar, Hash, Plus, Book } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
 import rehypeHighlight from 'rehype-highlight'
@@ -11,10 +11,12 @@ interface BookNoteProps {
   note: Note
   onUpdate: (note: Note) => void
   existingTags: string[]
+  isOverlay?: boolean
 }
 
-export function BookNote({ note, onUpdate, existingTags }: BookNoteProps) {
+export function BookNote({ note, onUpdate, existingTags, isOverlay = false }: BookNoteProps) {
   const [isPreview, setIsPreview] = useState(false)
+  const [isSideBySide, setIsSideBySide] = useState(false)
   const [isCommandOpen, setIsCommandOpen] = useState(false)
 
   const formattedDate = new Date(note.created).toLocaleDateString('en-US', {
@@ -41,8 +43,51 @@ export function BookNote({ note, onUpdate, existingTags }: BookNoteProps) {
     })
   }
 
+  const renderContent = () => {
+    if (isSideBySide) {
+      return (
+        <div className="side-by-side-container">
+          <textarea
+            className="editor side-by-side"
+            value={note.content}
+            onChange={(e) => onUpdate({ ...note, content: e.target.value })}
+            placeholder="Write your note..."
+          />
+          <div className="preview prose prose-invert max-w-none side-by-side">
+            <ReactMarkdown
+              remarkPlugins={[remarkMath]}
+              rehypePlugins={[rehypeKatex, rehypeHighlight]}
+            >
+              {note.content}
+            </ReactMarkdown>
+          </div>
+        </div>
+      )
+    }
+
+    return isPreview ? (
+      <div className="preview prose prose-invert max-w-none">
+        <ReactMarkdown
+          remarkPlugins={[remarkMath]}
+          rehypePlugins={[rehypeKatex, rehypeHighlight]}
+        >
+          {note.content}
+        </ReactMarkdown>
+      </div>
+    ) : (
+      <textarea
+        className="editor"
+        value={note.content}
+        onChange={(e) => onUpdate({ ...note, content: e.target.value })}
+        placeholder="Write your note..."
+      />
+    )
+  }
+
+  const containerClass = isOverlay ? 'book-note-overlay' : 'book-note'
+
   return (
-    <div className="book-note">
+    <div className={containerClass}>
       <div className="note-header">
         <input
           type="text"
@@ -51,12 +96,23 @@ export function BookNote({ note, onUpdate, existingTags }: BookNoteProps) {
           placeholder="Note title..."
           className="note-title-input"
         />
-        <button 
-          className="preview-button"
-          onClick={() => setIsPreview(!isPreview)}
-        >
-          {isPreview ? 'Edit' : 'Preview'}
-        </button>
+        <div className="note-actions">
+          <button 
+            className="preview-button"
+            onClick={() => setIsSideBySide(!isSideBySide)}
+            title="Toggle side-by-side view"
+          >
+            <Book size={16} />
+          </button>
+          {!isSideBySide && (
+            <button 
+              className="preview-button"
+              onClick={() => setIsPreview(!isPreview)}
+            >
+              {isPreview ? 'Edit' : 'Preview'}
+            </button>
+          )}
+        </div>
       </div>
       <div className="note-meta">
         <span className="note-timestamp">
@@ -77,23 +133,7 @@ export function BookNote({ note, onUpdate, existingTags }: BookNoteProps) {
           Add Tag
         </button>
       </div>
-      {isPreview ? (
-        <div className="preview prose prose-invert max-w-none">
-          <ReactMarkdown
-            remarkPlugins={[remarkMath]}
-            rehypePlugins={[rehypeKatex, rehypeHighlight]}
-          >
-            {note.content}
-          </ReactMarkdown>
-        </div>
-      ) : (
-        <textarea
-          className="editor"
-          value={note.content}
-          onChange={(e) => onUpdate({ ...note, content: e.target.value })}
-          placeholder="Write your note..."
-        />
-      )}
+      {renderContent()}
       {isCommandOpen && (
         <CommandPalette
           isOpen={isCommandOpen}
