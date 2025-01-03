@@ -2,11 +2,7 @@ import React, { useState, useCallback } from 'react'
 import { ListTodo } from 'lucide-react'
 import { TodoItem } from '../../types'
 
-export interface TodoWidgetProps {
-  readonly onDelete: () => void
-}
-
-export function TodoWidget({ onDelete }: TodoWidgetProps) {
+export function TodoWidget() {
   const [todos, setTodos] = useState<TodoItem[]>([])
   const [newTodoText, setNewTodoText] = useState('')
 
@@ -38,52 +34,32 @@ export function TodoWidget({ onDelete }: TodoWidgetProps) {
   }, [addTodo])
 
   return (
-    <section className="card" aria-label="Todo list widget">
-      <header className="card-header">
+    <div className="card">
+      <div className="card-header">
         <div className="card-title">
-          <ListTodo size={18} aria-hidden="true" />
+          <ListTodo size={18} />
           <span>Todo List</span>
         </div>
-        <button 
-          className="widget-delete-btn"
-          onClick={onDelete}
-          aria-label="Delete todo widget"
-        >
-          ✕
-        </button>
-      </header>
+      </div>
       <div className="card-content">
-        <form 
-          className="todo-input-group" 
-          onSubmit={handleSubmit}
-          role="form"
-          aria-label="Add todo form"
-        >
+        <form className="todo-input-group" onSubmit={handleSubmit}>
           <input
             type="text"
             className="todo-input"
             value={newTodoText}
             onChange={(e) => setNewTodoText(e.target.value)}
             placeholder="Add a new todo..."
-            aria-label="New todo text"
           />
-          <button 
-            type="submit" 
-            className="add-todo-button"
-            aria-label="Add todo"
-          >
+          <button type="submit" className="add-todo-button">
             Add
           </button>
         </form>
-        <ul className="todo-list" role="list">
+        <ul className="todo-list">
           {todos.map(todo => (
             <li key={todo.id} className="todo-item">
               <button
                 className="todo-checkbox"
                 onClick={() => toggleTodo(todo.id)}
-                aria-label={`Mark "${todo.text}" as ${todo.completed ? 'incomplete' : 'complete'}`}
-                aria-pressed={todo.completed}
-                type="button"
               >
                 {todo.completed && '✓'}
               </button>
@@ -94,6 +70,6 @@ export function TodoWidget({ onDelete }: TodoWidgetProps) {
           ))}
         </ul>
       </div>
-    </section>
+    </div>
   )
 } 

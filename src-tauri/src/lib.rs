@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
+use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct WidgetStyle {
@@ -86,6 +87,11 @@ fn get_canvas_file_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
     Ok(app_dir.join("canvas_state.json"))
 }
 
+fn get_header_image_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
+    let app_dir = app_handle.path().app_local_data_dir()
+        .map_err(|e| format!("Failed to get app directory: {}", e))?;
+    Ok(app_dir.join("header_image"))
+}
 
 #[tauri::command]
 async fn save_canvas_state(app_handle: AppHandle, canvas_data: CanvasData) -> Result<(), String> {
@@ -123,6 +129,62 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+#[tauri::command]
+async fn save_header_image(app_handle: AppHandle, image_data: String) -> Result<(), String> {
+    let image_path = get_header_image_path(&app_handle)?;
+    
+    // Create directory if it doesn't exist
+    if let Some(parent) = image_path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create directory: {}", e))?;
+    }
+    
+    // Remove "data:image/..." prefix and get raw base64
+    let base64_data = image_data.split(",").nth(1)
+        .ok_or_else(|| "Invalid image data format".to_string())?;
+    
+    // Decode base64 to bytes
+    let image_bytes = BASE64.decode(base64_data)
+        .map_err(|e| format!("Failed to decode image data: {}", e))?;
+    
+    // Write to file
+    fs::write(&image_path, image_bytes)
+        .map_err(|e| format!("Failed to write image file: {}", e))?;
+    
+    Ok(())
+}
+
+#[tauri::command]
+async fn load_header_image(app_handle: AppHandle) -> Result<Option<String>, String> {
+    let image_path = get_header_image_path(&app_handle)?;
+    
+    if !image_path.exists() {
+        return Ok(None);
+    }
+    
+    // Read file
+    let image_bytes = fs::read(&image_path)
+        .map_err(|e| format!("Failed to read image file: {}", e))?;
+    
+    // Convert to base64
+    let base64_data = BASE64.encode(&image_bytes);
+    
+    // Add proper data URL prefix based on file type (assuming PNG for now)
+    Ok(Some(format!("data:image/png;base64,{}", base64_data)))
+}
+
+#[tauri::command]
+async fn delete_header_image(app_handle: AppHandle) -> Result<(), String> {
+    let image_path = get_header_image_path(&app_handle)?;
+    
+    if image_path.exists() {
+        fs::remove_file(&image_path)
+            .map_err(|e| format!("Failed to delete image file: {}", e))?;
+    }
+    
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -130,7 +192,10 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             save_canvas_state,
-            load_canvas_state
+            load_canvas_state,
+            save_header_image,
+            load_header_image,
+            delete_header_image
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect } from 'react'
+import { invoke } from '@tauri-apps/api/core'
 import { useCanvas } from './CanvasContext'
 import { themes, Theme, ThemeType } from '../types/theme'
 
@@ -22,6 +23,25 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Ensure we have a valid theme
   const validTheme = (currentTheme as ThemeType) || 'dark'
 
+  // Load header image on mount
+  useEffect(() => {
+    const loadHeaderImage = async () => {
+      try {
+        const imageData = await invoke<string | null>('load_header_image')
+        if (imageData) {
+          updateSettings({
+            header_image: imageData,
+            show_header_image: true
+          })
+        }
+      } catch (error) {
+        console.error('Failed to load header image:', error)
+      }
+    }
+
+    loadHeaderImage()
+  }, [])
+
   const setTheme = (newTheme: ThemeType) => {
     setCanvasTheme(newTheme)
   }
@@ -31,8 +51,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Consider adding theme customization to canvas settings if needed
   }
 
-  const setHeaderImage = (image: string | null) => {
-    updateSettings({ header_image: image })
+  const setHeaderImage = async (image: string | null) => {
+    try {
+      if (image) {
+        await invoke('save_header_image', { imageData: image })
+      } else {
+        await invoke('delete_header_image')
+      }
+      
+      updateSettings({ 
+        header_image: image,
+        show_header_image: !!image 
+      })
+    } catch (error) {
+      console.error('Failed to save header image:', error)
+      // Optionally show an error message to the user
+    }
   }
 
   const setShowHeaderImage = (show: boolean) => {

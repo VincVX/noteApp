@@ -135,6 +135,15 @@ function AppContent() {
           style={{ 
             height: HEADER_HEIGHT,
             backgroundImage: `url(${headerImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            margin: '5px 20px 0 20px',
+            borderRadius: '8px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            flexShrink: 0,
+            width: 'calc(100% - 40px)',
+            minWidth: '1160px'
           }}
         />
       )}
@@ -187,7 +196,6 @@ function AppContent() {
                 {widget.widget_type === 'todo' && (
                   <TodoWidget
                     key={widget.id}
-                    onDelete={() => deleteWidget(widget.id)}
                   />
                 )}
                 {widget.widget_type === 'book' && (
