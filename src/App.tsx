@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 import { Menu, X } from 'lucide-react'
 import 'katex/dist/katex.min.css'
@@ -12,6 +12,7 @@ import { SettingsPage } from './components/settings/SettingsPage'
 import { ThemeProvider, useTheme } from './contexts/ThemeContext'
 import { SpotifyProvider } from './contexts/SpotifyContext'
 import { CanvasProvider, useCanvas } from './contexts/CanvasContext'
+import { CommandPalette } from './components/common/CommandPalette'
 
 const GridLayout = WidthProvider(Responsive)
 
@@ -36,9 +37,23 @@ function AppContent() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isLayoutLocked, setIsLayoutLocked] = useState(false)
   const [snapToGrid, setSnapToGrid] = useState(false)
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false)
   const { headerImage, showHeaderImage } = useTheme()
   const { canvasData, updateWidget, addWidget: addCanvasWidget, removeWidget, updateSettings } = useCanvas()
   const { widgets, settings } = canvasData
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Option (Alt) + Space
+      if (e.altKey && e.code === 'Space') {
+        e.preventDefault()
+        setIsCommandPaletteOpen(true)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Calculate the next available position for a new widget
   const findNextPosition = (width: number, height: number) => {
@@ -236,6 +251,12 @@ function AppContent() {
       {isSettingsOpen && (
         <SettingsPage onClose={() => setIsSettingsOpen(false)} />
       )}
+
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onAddWidget={addWidget}
+      />
     </div>
   )
 }
