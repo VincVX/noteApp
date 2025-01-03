@@ -4,7 +4,7 @@ import { Widget } from '../../types'
 interface SidebarProps {
   readonly isOpen: boolean
   readonly onClose: () => void
-  readonly onAddWidget: (type: Widget['type']) => void
+  readonly onAddWidget: (type: Widget['widget_type']) => void
   readonly onSnapToGrid: () => void
   readonly isSnapToGridEnabled: boolean
   readonly onOpenSettings: () => void

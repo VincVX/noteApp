@@ -1,6 +1,7 @@
 import React, { useRef } from 'react'
-import { X, Upload, Trash2 } from 'lucide-react'
+import { X, Upload, Trash2, Grid, Lock } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useCanvas } from '../../contexts/CanvasContext'
 import { ThemeCustomizer } from './ThemeCustomizer'
 
 interface SettingsPageProps {
@@ -9,6 +10,8 @@ interface SettingsPageProps {
 
 export function SettingsPage({ onClose }: SettingsPageProps) {
   const { currentTheme, setTheme, headerImage, setHeaderImage, setShowHeaderImage } = useTheme()
+  const { canvasData, updateSettings } = useCanvas()
+  const { settings } = canvasData
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,23 +78,76 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
                     Upload Image
                   </button>
                 ) : (
-                  <>
-                    <button
-                      className="setting-option"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Upload size={16} />
-                      Change Image
-                    </button>
-                    <button
-                      className="setting-option"
-                      onClick={handleRemoveImage}
-                    >
-                      <Trash2 size={16} />
-                      Remove
-                    </button>
-                  </>
+                  <button
+                    className="setting-option"
+                    onClick={handleRemoveImage}
+                  >
+                    <Trash2 size={16} />
+                    Remove Image
+                  </button>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <h2>Canvas</h2>
+          <div className="setting-group">
+            <div className="setting-item">
+              <div className="setting-label">
+                <label>Grid</label>
+                <div className="setting-description">
+                  Show grid lines on the canvas
+                </div>
+              </div>
+              <div className="setting-options">
+                <button
+                  className={`setting-option ${settings.grid_enabled ? 'active' : ''}`}
+                  onClick={() => updateSettings({ grid_enabled: !settings.grid_enabled })}
+                >
+                  <Grid size={16} />
+                  {settings.grid_enabled ? 'Hide Grid' : 'Show Grid'}
+                </button>
+              </div>
+            </div>
+
+            {settings.grid_enabled && (
+              <div className="setting-item">
+                <div className="setting-label">
+                  <label>Grid Size</label>
+                  <div className="setting-description">
+                    Adjust the size of grid cells
+                  </div>
+                </div>
+                <div className="setting-options">
+                  <input
+                    type="range"
+                    min="10"
+                    max="50"
+                    value={settings.grid_size}
+                    onChange={(e) => updateSettings({ grid_size: parseInt(e.target.value) })}
+                    className="setting-slider"
+                  />
+                  <span className="setting-value">{settings.grid_size}px</span>
+                </div>
+              </div>
+            )}
+
+            <div className="setting-item">
+              <div className="setting-label">
+                <label>Snap to Grid</label>
+                <div className="setting-description">
+                  Automatically align widgets to grid lines
+                </div>
+              </div>
+              <div className="setting-options">
+                <button
+                  className={`setting-option ${settings.snap_to_grid ? 'active' : ''}`}
+                  onClick={() => updateSettings({ snap_to_grid: !settings.snap_to_grid })}
+                >
+                  {settings.snap_to_grid ? 'Disable Snap' : 'Enable Snap'}
+                </button>
               </div>
             </div>
           </div>

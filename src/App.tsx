@@ -234,13 +234,13 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <SpotifyProvider>
-        <CanvasProvider>
+    <CanvasProvider>
+      <ThemeProvider>
+        <SpotifyProvider>
           <AppContent />
-        </CanvasProvider>
-      </SpotifyProvider>
-    </ThemeProvider>
+        </SpotifyProvider>
+      </ThemeProvider>
+    </CanvasProvider>
   )
 }
 
