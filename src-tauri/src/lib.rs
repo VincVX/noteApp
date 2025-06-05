@@ -23,6 +23,7 @@ struct Widget {
     position: Position,
     size: Size,
     style: WidgetStyle,
+    created: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -44,6 +45,8 @@ struct CanvasSettings {
     grid_size: i32,
     snap_to_grid: bool,
     zoom_level: f32,
+    header_image: Option<String>,
+    show_header_image: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -70,6 +73,8 @@ impl Default for CanvasData {
                 grid_size: 20,
                 snap_to_grid: false,
                 zoom_level: 1.0,
+                header_image: None,
+                show_header_image: Some(false),
             },
             canvas_size: CanvasSize {
                 width: 1920,
