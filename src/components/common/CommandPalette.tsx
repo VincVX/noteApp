@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Type, CheckSquare, Book, Music, Image, Search, Layout, Hash, Plus } from 'lucide-react'
 import { Widget } from '../../types'
 
@@ -41,16 +41,22 @@ export function CommandPalette(props: CommandPaletteProps) {
 
   const suggestions = search.trim()
     ? props.mode === 'widget'
-      ? widgetOptions.filter(option => 
+      ? widgetOptions.filter(option =>
           option.label.toLowerCase().includes(search.toLowerCase()) ||
           option.type.toLowerCase().includes(search.toLowerCase())
         )
-      : props.existingTags.filter(tag => 
+      : props.existingTags.filter(tag =>
           tag.toLowerCase().includes(search.toLowerCase())
         )
     : props.mode === 'widget'
       ? widgetOptions
       : props.existingTags
+
+  useEffect(() => {
+    if (suggestions.length === 0) {
+      setSelectedIndex(0)
+    }
+  }, [suggestions.length])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (props.mode === 'tag' && search.trim() && suggestions.length === 0 && e.key === 'Enter') {
@@ -63,15 +69,23 @@ export function CommandPalette(props: CommandPaletteProps) {
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault()
-        setSelectedIndex(i => (i + 1) % suggestions.length)
+        if (suggestions.length > 0) {
+          setSelectedIndex(i => (i + 1) % suggestions.length)
+        } else {
+          setSelectedIndex(0)
+        }
         break
       case 'ArrowUp':
         e.preventDefault()
-        setSelectedIndex(i => (i - 1 + suggestions.length) % suggestions.length)
+        if (suggestions.length > 0) {
+          setSelectedIndex(i => (i - 1 + suggestions.length) % suggestions.length)
+        } else {
+          setSelectedIndex(0)
+        }
         break
       case 'Enter':
         e.preventDefault()
-        if (suggestions[selectedIndex]) {
+        if (suggestions.length > 0 && suggestions[selectedIndex]) {
           if (props.mode === 'widget') {
             props.onAddWidget((suggestions[selectedIndex] as WidgetOption).type)
           } else {
