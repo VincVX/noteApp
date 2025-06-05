@@ -13,13 +13,16 @@ import { ThemeProvider, useTheme } from './contexts/ThemeContext'
 import { SpotifyProvider } from './contexts/SpotifyContext'
 import { CanvasProvider, useCanvas } from './contexts/CanvasContext'
 import { CommandPalette } from './components/common/CommandPalette'
+import {
+  HEADER_HEIGHT,
+  GRID_COLS,
+  GRID_ROW_HEIGHT,
+  HEADER_MARGIN,
+  findNextPosition as calculateNextPosition,
+} from './utils/layout'
 
 const GridLayout = WidthProvider(Responsive)
 
-const HEADER_HEIGHT = 75
-const GRID_COLS = 12
-const GRID_ROW_HEIGHT = 50
-const HEADER_MARGIN = 5
 
 // Helper function to convert Widget to Layout
 const widgetToLayout = (widget: Widget): Layout => ({
@@ -57,25 +60,7 @@ function AppContent() {
 
   // Calculate the next available position for a new widget
   const findNextPosition = (width: number, height: number) => {
-    const headerGridUnits = showHeaderImage ? Math.ceil((HEADER_HEIGHT + HEADER_MARGIN) / GRID_ROW_HEIGHT) : 0
-    
-    if (widgets.length === 0) {
-      return { x: 0, y: headerGridUnits }
-    }
-
-    // Try to find space in the current row first
-    const currentRowY = Math.max(...widgets.map(item => item.position.y))
-    const itemsInCurrentRow = widgets.filter(item => item.position.y === currentRowY)
-    const lastItemInRow = itemsInCurrentRow[itemsInCurrentRow.length - 1]
-    
-    if (lastItemInRow && (lastItemInRow.position.x + lastItemInRow.size.width + width) <= GRID_COLS) {
-      // There's space in the current row
-      return { x: lastItemInRow.position.x + lastItemInRow.size.width, y: currentRowY }
-    }
-
-    // Start a new row
-    const maxY = Math.max(...widgets.map(item => item.position.y + item.size.height))
-    return { x: 0, y: Math.max(maxY, headerGridUnits) }
+    return calculateNextPosition(widgets, showHeaderImage, width, height)
   }
 
   const addWidget = (type: Widget['widget_type']) => {
