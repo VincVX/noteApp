@@ -118,7 +118,7 @@ function AppContent() {
     if (widget) {
       updateWidget({
         ...widget,
-        content: updates.content || widget.content
+        content: updates.content ?? widget.content
       })
     }
   }
